@@ -1,0 +1,13 @@
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.vscode/
+.idea/
+.git/
+.gitignore
+*.bak
+congbarber.db
+congbarber.db-shm
+congbarber.db-wal

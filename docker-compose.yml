@@ -1,0 +1,44 @@
+services:
+  # ==========================================
+  # 1. Backend Service: .NET 10 Web API
+  # ==========================================
+  backend:
+    build:
+      context: ./backend/CongBarber.Api
+      dockerfile: Dockerfile
+    container_name: congbarber-backend
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5012
+    ports:
+      - "5012:5012"
+    volumes:
+      # Gắn file SQLite database từ host vào container để bảo toàn dữ liệu bán hàng
+      - ./backend/CongBarber.Api/congbarber.db:/app/congbarber.db
+    networks:
+      - congbarber-network
+
+  # ==========================================
+  # 2. Frontend Service: Vue 3 + Nginx Reverse Proxy
+  # ==========================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: congbarber-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"       # Cổng HTTP chuẩn
+      - "5173:80"     # Cổng phát triển tiện ích
+    depends_on:
+      - backend
+    networks:
+      - congbarber-network
+
+# ==========================================
+# Cấu hình Network nội bộ kết nối Frontend & Backend
+# ==========================================
+networks:
+  congbarber-network:
+    driver: bridge

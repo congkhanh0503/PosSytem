@@ -1,0 +1,6 @@
+@CongBarber.Api_HostAddress = http://localhost:5012
+
+GET {{CongBarber.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
