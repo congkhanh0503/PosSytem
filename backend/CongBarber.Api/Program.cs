@@ -5,10 +5,19 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Thiết lập cổng lắng nghe mặc định http://0.0.0.0:5012 nếu chưa cấu hình
+if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_URLS")))
+{
+    builder.WebHost.UseUrls("http://0.0.0.0:5012");
+}
+
+// Đường dẫn file SQLite luôn nằm cạnh file thực thi
+string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "congbarber.db");
+
 // 1. Cấu hình Database SQLite
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") 
-                      ?? "Data Source=congbarber.db"));
+                      ?? $"Data Source={dbPath}"));
 
 // 2. Đăng ký Services
 builder.Services.AddScoped<IVietQrService, VietQrService>();
@@ -64,10 +73,37 @@ if (app.Environment.IsDevelopment() || true)
     });
 }
 
+// Phục vụ giao diện Web SPA Vue 3
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.UseCors("AllowAll");
-
 app.UseAuthorization();
-
 app.MapControllers();
+
+// SPA fallback cho Vue Router
+app.MapFallbackToFile("index.html");
+
+// Tự động mở trình duyệt web khi ứng dụng bắt đầu chạy
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    try
+    {
+        // Chờ 500ms để server sẵn sàng
+        Task.Delay(500).ContinueWith(_ =>
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "http://localhost:5012",
+                    UseShellExecute = true
+                });
+            }
+            catch { }
+        });
+    }
+    catch { }
+});
 
 app.Run();

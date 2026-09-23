@@ -13,6 +13,14 @@ public class BackupController : ControllerBase
     private readonly AppDbContext _context;
     private readonly IWebHostEnvironment _env;
 
+    private string GetDbPath()
+    {
+        string fullPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "congbarber.db");
+        if (System.IO.File.Exists(fullPath)) return fullPath;
+        if (System.IO.File.Exists("congbarber.db")) return "congbarber.db";
+        return fullPath;
+    }
+
     public BackupController(AppDbContext context, IWebHostEnvironment env)
     {
         _context = context;
@@ -22,7 +30,7 @@ public class BackupController : ControllerBase
     [HttpGet("info")]
     public async Task<ActionResult> GetBackupInfo()
     {
-        string dbPath = "congbarber.db";
+        string dbPath = GetDbPath();
         long fileSizeBytes = 0;
         DateTime lastModified = DateTime.UtcNow;
 
@@ -54,7 +62,7 @@ public class BackupController : ControllerBase
     [HttpGet("download")]
     public async Task<IActionResult> DownloadBackup()
     {
-        string dbPath = "congbarber.db";
+        string dbPath = GetDbPath();
         if (!System.IO.File.Exists(dbPath))
         {
             return NotFound("Chưa tìm thấy file cơ sở dữ liệu congbarber.db.");
@@ -116,7 +124,7 @@ public class BackupController : ControllerBase
             }
         }
 
-        string dbPath = "congbarber.db";
+        string dbPath = GetDbPath();
         string preRestoreBakPath = $"congbarber_{DateTime.UtcNow:yyyyMMdd_HHmmss}.bak";
 
         try
