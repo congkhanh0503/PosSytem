@@ -156,6 +156,59 @@ public class DashboardController : ControllerBase
             .Take(5)
             .ToList();
 
+        // 8. Bảng kê doanh thu chi tiết từng ngày trong tháng được chọn
+        var dailyBreakdown = new List<DailyReportItemDto>();
+        DateTime endDay = (selectedYear == now.Year && selectedMonth == now.Month)
+            ? now.Date
+            : monthEnd.AddDays(-1).Date;
+
+        for (var d = endDay; d >= monthStart.Date; d = d.AddDays(-1))
+        {
+            var nextD = d.AddDays(1);
+            var dayOrders = monthOrders
+                .Where(o => o.CreatedAt >= d && o.CreatedAt < nextD)
+                .ToList();
+
+            var dayExpenses = monthExpenses
+                .Where(e => e.Date >= d && e.Date < nextD)
+                .ToList();
+
+            decimal dayRev = dayOrders.Sum(o => o.FinalAmount);
+            decimal dayExp = dayExpenses.Sum(e => e.Amount);
+            decimal dayDisc = dayOrders.Sum(o => o.DiscountAmount);
+
+            var dayItems = dayOrders.SelectMany(o => o.Items).ToList();
+            decimal daySvc = dayItems.Where(i => i.ItemType == "Service").Sum(i => i.TotalPrice);
+            decimal dayProd = dayItems.Where(i => i.ItemType == "Product").Sum(i => i.TotalPrice);
+
+            string dayOfWeekVi = d.DayOfWeek switch
+            {
+                DayOfWeek.Sunday => "Chủ Nhật",
+                DayOfWeek.Monday => "Thứ Hai",
+                DayOfWeek.Tuesday => "Thứ Ba",
+                DayOfWeek.Wednesday => "Thứ Tư",
+                DayOfWeek.Thursday => "Thứ Năm",
+                DayOfWeek.Friday => "Thứ Sáu",
+                DayOfWeek.Saturday => "Thứ Bảy",
+                _ => ""
+            };
+
+            dailyBreakdown.Add(new DailyReportItemDto
+            {
+                Date = d.ToString("yyyy-MM-dd"),
+                DateFormatted = d.ToString("dd/MM/yyyy"),
+                DayOfWeek = dayOfWeekVi,
+                IsToday = (d == now.Date),
+                OrdersCount = dayOrders.Count,
+                ServiceRevenue = daySvc,
+                ProductRevenue = dayProd,
+                DiscountTotal = dayDisc,
+                Revenue = dayRev,
+                Expense = dayExp,
+                NetProfit = dayRev - dayExp
+            });
+        }
+
         return Ok(new DashboardSummaryDto
         {
             TodayRevenue = todayRevenue,
@@ -180,7 +233,66 @@ public class DashboardController : ControllerBase
             Last7DaysSales = last7Days,
             TopServices = topServices,
             TopProducts = topProducts,
-            ExpenseCategories = expenseCategories
+            ExpenseCategories = expenseCategories,
+            DailyBreakdown = dailyBreakdown
+        });
+    }
+
+    [HttpGet("day-detail")]
+    public async Task<ActionResult<DayDetailDto>> GetDayDetail([FromQuery] string? date = null)
+    {
+        var now = DateTime.UtcNow;
+        DateTime parsedDate = now.Date;
+
+        if (!string.IsNullOrWhiteSpace(date) && DateTime.TryParse(date, out DateTime dt))
+        {
+            parsedDate = dt.Date;
+        }
+
+        var start = parsedDate;
+        var end = start.AddDays(1);
+
+        var orders = await _context.Orders
+            .Include(o => o.Items)
+            .Where(o => o.CreatedAt >= start && o.CreatedAt < end && o.PaymentStatus == "Completed")
+            .OrderByDescending(o => o.CreatedAt)
+            .ToListAsync();
+
+        var expenses = await _context.Expenses
+            .Where(e => e.Date >= start && e.Date < end)
+            .OrderByDescending(e => e.CreatedAt)
+            .ToListAsync();
+
+        decimal revenue = orders.Sum(o => o.FinalAmount);
+        decimal expense = expenses.Sum(e => e.Amount);
+        decimal vietQr = orders.Where(o => o.PaymentMethod == "VietQR").Sum(o => o.FinalAmount);
+        decimal cash = orders.Where(o => o.PaymentMethod == "Cash").Sum(o => o.FinalAmount);
+
+        string dayOfWeekVi = start.DayOfWeek switch
+        {
+            DayOfWeek.Sunday => "Chủ Nhật",
+            DayOfWeek.Monday => "Thứ Hai",
+            DayOfWeek.Tuesday => "Thứ Ba",
+            DayOfWeek.Wednesday => "Thứ Tư",
+            DayOfWeek.Thursday => "Thứ Năm",
+            DayOfWeek.Friday => "Thứ Sáu",
+            DayOfWeek.Saturday => "Thứ Bảy",
+            _ => ""
+        };
+
+        return Ok(new DayDetailDto
+        {
+            Date = start.ToString("yyyy-MM-dd"),
+            DateFormatted = start.ToString("dd/MM/yyyy"),
+            DayOfWeek = dayOfWeekVi,
+            OrdersCount = orders.Count,
+            Revenue = revenue,
+            Expense = expense,
+            NetProfit = revenue - expense,
+            VietQrTotal = vietQr,
+            CashTotal = cash,
+            Orders = orders,
+            Expenses = expenses
         });
     }
 }

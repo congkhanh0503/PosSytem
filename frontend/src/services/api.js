@@ -31,6 +31,7 @@ export const api = {
 
   // Dashboard
   getDashboardSummary: (params) => apiClient.get('/dashboard/summary', { params }),
+  getDayDetail: (date) => apiClient.get('/dashboard/day-detail', { params: { date } }),
 
   // Settings
   getSettings: () => apiClient.get('/settings'),

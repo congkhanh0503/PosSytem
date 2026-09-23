@@ -1,3 +1,5 @@
+using CongBarber.Api.Models;
+
 namespace CongBarber.Api.Dtos;
 
 public class OrderItemRequestDto
@@ -81,4 +83,37 @@ public class DashboardSummaryDto
     public List<TopItemDto> TopServices { get; set; } = new();
     public List<TopItemDto> TopProducts { get; set; } = new();
     public List<ExpenseCategoryDto> ExpenseCategories { get; set; } = new();
+
+    // Danh sách doanh thu & lợi nhuận chi tiết từng ngày trong tháng
+    public List<DailyReportItemDto> DailyBreakdown { get; set; } = new();
+}
+
+public class DailyReportItemDto
+{
+    public string Date { get; set; } = string.Empty; // "2026-09-23"
+    public string DateFormatted { get; set; } = string.Empty; // "23/09/2026"
+    public string DayOfWeek { get; set; } = string.Empty; // "Thứ Tư"
+    public bool IsToday { get; set; }
+    public int OrdersCount { get; set; }
+    public decimal ServiceRevenue { get; set; }
+    public decimal ProductRevenue { get; set; }
+    public decimal DiscountTotal { get; set; }
+    public decimal Revenue { get; set; }
+    public decimal Expense { get; set; }
+    public decimal NetProfit { get; set; }
+}
+
+public class DayDetailDto
+{
+    public string Date { get; set; } = string.Empty;
+    public string DateFormatted { get; set; } = string.Empty;
+    public string DayOfWeek { get; set; } = string.Empty;
+    public int OrdersCount { get; set; }
+    public decimal Revenue { get; set; }
+    public decimal Expense { get; set; }
+    public decimal NetProfit { get; set; }
+    public decimal VietQrTotal { get; set; }
+    public decimal CashTotal { get; set; }
+    public List<Order> Orders { get; set; } = new();
+    public List<Expense> Expenses { get; set; } = new();
 }
