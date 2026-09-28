@@ -132,7 +132,6 @@ public class ExpensesController : ControllerBase
             "Phụ liệu & Hóa chất",     // Lưỡi dao cạo, bọt cạo, thuốc uốn nhuộm, khăn giấy
             "Dụng cụ & Máy móc",       // Kéo cắt tóc, tông đơ, máy sấy, dầu tra tông đơ, lược
             "Sinh hoạt & Ăn uống",     // Cơm trưa, cà phê, nước ngọt trong ca
-            "Marketing & Quảng cáo",   // Biển hiệu, in card, chạy quảng cáo tiệm
             "Khác"                     // Chi phí phát sinh khác
         };
         return Ok(categories);

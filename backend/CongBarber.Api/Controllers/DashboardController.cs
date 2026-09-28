@@ -21,7 +21,7 @@ public class DashboardController : ControllerBase
         [FromQuery] int? month = null, 
         [FromQuery] int? year = null)
     {
-        var now = DateTime.UtcNow;
+        var now = DateTime.UtcNow.AddHours(7);
         var todayStart = now.Date;
 
         int selectedYear = year ?? now.Year;
@@ -209,6 +209,41 @@ public class DashboardController : ControllerBase
             });
         }
 
+        // 9. Biến động chi tiêu qua 6 tháng gần nhất tính đến tháng được chọn
+        var trendStart = monthStart.AddMonths(-5);
+        var trendEnd = monthEnd;
+
+        var allTrendExpenses = await _context.Expenses
+            .Where(e => e.Date >= trendStart && e.Date < trendEnd)
+            .ToListAsync();
+
+        var allTrendOrders = await completedOrdersQuery
+            .Where(o => o.CreatedAt >= trendStart && o.CreatedAt < trendEnd)
+            .ToListAsync();
+
+        var monthlyExpenseTrend = new List<MonthlyExpenseTrendDto>();
+        for (int i = 5; i >= 0; i--)
+        {
+            var mStart = monthStart.AddMonths(-i);
+            var mEnd = mStart.AddMonths(1);
+
+            var mExpList = allTrendExpenses.Where(e => e.Date >= mStart && e.Date < mEnd).ToList();
+            var mOrdList = allTrendOrders.Where(o => o.CreatedAt >= mStart && o.CreatedAt < mEnd).ToList();
+
+            decimal mExpTotal = mExpList.Sum(e => e.Amount);
+            decimal mRevTotal = mOrdList.Sum(o => o.FinalAmount);
+
+            monthlyExpenseTrend.Add(new MonthlyExpenseTrendDto
+            {
+                MonthKey = mStart.ToString("yyyy-MM"),
+                MonthName = $"T{mStart.Month:D2}/{mStart:yy}",
+                TotalExpense = mExpTotal,
+                ExpensesCount = mExpList.Count,
+                TotalRevenue = mRevTotal,
+                NetProfit = mRevTotal - mExpTotal
+            });
+        }
+
         return Ok(new DashboardSummaryDto
         {
             TodayRevenue = todayRevenue,
@@ -234,6 +269,7 @@ public class DashboardController : ControllerBase
             TopServices = topServices,
             TopProducts = topProducts,
             ExpenseCategories = expenseCategories,
+            MonthlyExpenseTrend = monthlyExpenseTrend,
             DailyBreakdown = dailyBreakdown
         });
     }

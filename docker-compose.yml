@@ -11,11 +11,12 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:5012
+      - DB_PATH=/app/data/congbarber.db
     ports:
       - "5012:5012"
     volumes:
-      # Gắn file SQLite database từ host vào container để bảo toàn dữ liệu bán hàng
-      - ./backend/CongBarber.Api/congbarber.db:/app/congbarber.db
+      # Sử dụng named volume để tránh lỗi Disk I/O SQLite trên Docker và bảo toàn dữ liệu bán hàng
+      - congbarber-data:/app/data
     networks:
       - congbarber-network
 
@@ -37,8 +38,12 @@ services:
       - congbarber-network
 
 # ==========================================
-# Cấu hình Network nội bộ kết nối Frontend & Backend
+# Cấu hình Network & Persistent Volume
 # ==========================================
 networks:
   congbarber-network:
     driver: bridge
+
+volumes:
+  congbarber-data:
+    driver: local

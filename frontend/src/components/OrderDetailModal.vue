@@ -1,40 +1,40 @@
 <template>
-  <div v-if="isOpen && order" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-    <div class="relative w-full max-w-lg bg-barber-card border border-barber-border rounded-2xl shadow-2xl p-6 overflow-hidden">
+  <div v-if="isOpen && order" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+    <div class="relative w-full max-w-lg bg-white border border-slate-200 rounded-2xl shadow-2xl p-6 overflow-hidden">
       <!-- Close Button -->
       <button 
         @click="$emit('close')" 
-        class="absolute top-4 right-4 text-zinc-400 hover:text-white p-2 rounded-lg hover:bg-white/5 transition"
+        class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-2 rounded-lg hover:bg-slate-100 transition"
       >
         ✕
       </button>
 
       <!-- Header -->
-      <div class="border-b border-barber-border pb-4 mb-4">
+      <div class="border-b border-slate-100 pb-4 mb-4">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-amber-500/10 text-barber-gold border border-amber-500/30">
+          <span class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-indigo-50 text-indigo-600 border border-indigo-200">
             {{ order.orderCode }}
           </span>
           <span 
             class="text-xs font-semibold px-2.5 py-1 rounded-full"
-            :class="order.paymentStatus === 'Completed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'"
+            :class="order.paymentStatus === 'Completed' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'"
           >
             {{ order.paymentStatus === 'Completed' ? 'Đã thanh toán' : 'Đã hủy' }}
           </span>
         </div>
-        <h3 class="text-lg font-bold text-white mt-2">Chi Tiết Hóa Đơn Điện Tử</h3>
-        <p class="text-xs text-zinc-400">{{ formatDate(order.createdAt) }} • Hình thức: {{ order.paymentMethod }}</p>
+        <h3 class="text-lg font-bold text-slate-900 mt-2">Chi Tiết Hóa Đơn Điện Tử</h3>
+        <p class="text-xs text-slate-500">{{ formatDate(order.createdAt) }} • Hình thức: {{ order.paymentMethod }}</p>
       </div>
 
       <!-- Customer & Note -->
-      <div class="bg-barber-dark/60 p-3 rounded-xl border border-barber-border text-xs space-y-1.5 mb-4">
+      <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 text-xs space-y-1.5 mb-4">
         <div class="flex justify-between">
-          <span class="text-zinc-400">Khách hàng:</span>
-          <span class="font-medium text-white">{{ order.customerName || 'Khách vãng lai' }} {{ order.customerPhone ? `(${order.customerPhone})` : '' }}</span>
+          <span class="text-slate-500">Khách hàng:</span>
+          <span class="font-semibold text-slate-800">{{ order.customerName || 'Khách vãng lai' }} {{ order.customerPhone ? `(${order.customerPhone})` : '' }}</span>
         </div>
-        <div v-if="order.note" class="pt-1.5 border-t border-zinc-800/80">
-          <span class="text-zinc-400 block mb-0.5">Ghi chú đơn hàng:</span>
-          <p class="text-amber-200/90 italic bg-black/30 p-2 rounded">{{ order.note }}</p>
+        <div v-if="order.note" class="pt-1.5 border-t border-slate-200">
+          <span class="text-slate-500 block mb-0.5">Ghi chú đơn hàng:</span>
+          <p class="text-slate-700 italic bg-white p-2 rounded border border-slate-200/60">{{ order.note }}</p>
         </div>
       </div>
 
@@ -43,50 +43,62 @@
         <div 
           v-for="(item, idx) in order.items" 
           :key="idx"
-          class="flex justify-between items-center p-2.5 rounded-lg bg-zinc-900/50 border border-zinc-800/80 text-xs"
+          class="flex justify-between items-center p-2.5 rounded-lg bg-slate-50 border border-slate-200/60 text-xs"
         >
           <div class="flex items-center gap-2">
             <span 
               class="px-1.5 py-0.5 rounded text-[10px] font-bold"
-              :class="item.itemType === 'Service' ? 'bg-amber-500/20 text-barber-gold' : 'bg-cyan-500/20 text-cyan-400'"
+              :class="item.itemType === 'Service' ? 'bg-indigo-50 text-indigo-600' : 'bg-blue-50 text-blue-600'"
             >
               {{ item.itemType === 'Service' ? 'Dịch vụ' : 'Sản phẩm' }}
             </span>
-            <span class="text-white font-medium">{{ item.itemName }}</span>
-            <span class="text-zinc-400">x{{ item.quantity }}</span>
+            <span class="text-slate-800 font-medium">{{ item.itemName }}</span>
+            <span class="text-slate-400">x{{ item.quantity }}</span>
           </div>
-          <span class="text-amber-200 font-semibold">{{ formatCurrency(item.totalPrice) }}</span>
+          <span class="text-slate-900 font-semibold">{{ formatCurrency(item.totalPrice) }}</span>
         </div>
       </div>
 
       <!-- Calculation breakdown -->
-      <div class="mt-4 pt-3 border-t border-barber-border space-y-1.5 text-xs">
-        <div class="flex justify-between text-zinc-400">
+      <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
+        <div class="flex justify-between text-slate-500">
           <span>Tạm tính (tiền gốc):</span>
           <span>{{ formatCurrency(order.subTotal) }}</span>
         </div>
-        <div v-if="order.discountPercent > 0" class="flex justify-between text-emerald-400 font-medium">
+        <div v-if="order.discountPercent > 0" class="flex justify-between text-emerald-600 font-medium">
           <span>Giảm giá ({{ order.discountPercent }}%):</span>
           <span>-{{ formatCurrency(order.discountAmount) }}</span>
         </div>
-        <div class="flex justify-between text-sm font-bold text-white pt-2 border-t border-zinc-800">
+        <div class="flex justify-between text-sm font-bold text-slate-900 pt-2 border-t border-slate-200">
           <span>Tổng thực thu:</span>
-          <span class="text-barber-gold text-base">{{ formatCurrency(order.finalAmount) }}</span>
+          <span class="text-indigo-600 text-base">{{ formatCurrency(order.finalAmount) }}</span>
         </div>
       </div>
 
       <!-- Actions -->
-      <div class="mt-6 flex gap-3">
+      <div class="mt-6 flex flex-wrap gap-2.5">
+        <button
+          @click="$emit('edit-order', order)"
+          class="py-2 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 font-semibold text-xs transition flex items-center gap-1.5"
+        >
+          <span>✏️</span> Sửa Đơn
+        </button>
+        <button
+          @click="$emit('delete-order', order.id)"
+          class="py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-semibold text-xs transition flex items-center gap-1.5"
+        >
+          <span>🗑️</span> Xóa Đơn
+        </button>
         <button
           v-if="order.paymentStatus === 'Completed'"
           @click="$emit('cancel-order', order.id)"
-          class="py-2.5 px-4 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-semibold text-xs transition"
+          class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition"
         >
-          Hủy Đơn Hàng Này
+          Hủy Bỏ
         </button>
         <button
           @click="$emit('close')"
-          class="flex-1 py-2.5 px-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-xs transition"
+          class="flex-1 py-2 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition text-center shadow-sm"
         >
           Đóng
         </button>
@@ -102,7 +114,7 @@ defineProps({
   order: Object
 })
 
-defineEmits(['close', 'cancel-order'])
+defineEmits(['close', 'cancel-order', 'edit-order', 'delete-order'])
 
 function formatCurrency(val) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0)
@@ -114,6 +126,7 @@ function formatDate(dateStr) {
   return d.toLocaleString('vi-VN', { 
     hour: '2-digit', 
     minute: '2-digit', 
+    second: '2-digit',
     day: '2-digit', 
     month: '2-digit', 
     year: 'numeric' 

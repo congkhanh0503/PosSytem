@@ -8,16 +8,26 @@ export default {
   theme: {
     extend: {
       colors: {
+        diro: {
+          primary: '#4f46e5',
+          primaryHover: '#4338ca',
+          accent: '#2563eb',
+          bg: '#f8fafc',
+          card: '#ffffff',
+          border: '#e2e8f0',
+          text: '#0f172a',
+          muted: '#64748b'
+        },
         barber: {
-          dark: '#0e0e11',
-          card: '#16161c',
-          border: '#262631',
-          gold: '#e5a93c',
-          goldHover: '#f5b84d',
-          goldMuted: '#946e27',
-          accent: '#c59b27',
-          gray: '#8f909d',
-          light: '#f4f4f6'
+          dark: '#f8fafc',
+          card: '#ffffff',
+          border: '#e2e8f0',
+          gold: '#4f46e5',
+          goldHover: '#4338ca',
+          goldMuted: '#818cf8',
+          accent: '#2563eb',
+          gray: '#64748b',
+          light: '#0f172a'
         }
       }
     },

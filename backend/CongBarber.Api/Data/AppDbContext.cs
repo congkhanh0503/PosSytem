@@ -15,6 +15,8 @@ public class AppDbContext : DbContext
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<ShopSetting> ShopSettings => Set<ShopSetting>();
     public DbSet<Expense> Expenses => Set<Expense>();
+    public DbSet<ServiceCategory> ServiceCategories => Set<ServiceCategory>();
+    public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

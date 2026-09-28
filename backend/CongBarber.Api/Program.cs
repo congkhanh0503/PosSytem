@@ -11,8 +11,15 @@ if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_URLS")))
     builder.WebHost.UseUrls("http://0.0.0.0:5012");
 }
 
-// Đường dẫn file SQLite luôn nằm cạnh file thực thi
-string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "congbarber.db");
+// Đường dẫn file SQLite (ưu tiên biến môi trường DB_PATH nếu chạy trong Docker container)
+string dbPath = Environment.GetEnvironmentVariable("DB_PATH") 
+    ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "congbarber.db");
+
+string? dbDir = Path.GetDirectoryName(dbPath);
+if (!string.IsNullOrEmpty(dbDir) && !Directory.Exists(dbDir))
+{
+    Directory.CreateDirectory(dbDir);
+}
 
 // 1. Cấu hình Database SQLite
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -43,15 +50,7 @@ builder.Services.AddCors(options =>
 
 // 5. Cấu hình Swagger
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.OpenApiInfo
-    {
-        Title = "CongBarber POS API",
-        Version = "v1",
-        Description = "API hệ thống POS tiệm cắt tóc 1 thợ với tích hợp VietQR"
-    });
-});
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -68,7 +67,7 @@ if (app.Environment.IsDevelopment() || true)
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "CongBarber POS API v1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "DiroPos API v1");
         c.RoutePrefix = "swagger";
     });
 }

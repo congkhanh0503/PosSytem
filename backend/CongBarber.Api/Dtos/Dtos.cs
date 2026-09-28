@@ -21,6 +21,16 @@ public class CreateOrderDto
     public List<OrderItemRequestDto> Items { get; set; } = new();
 }
 
+public class UpdateOrderDto
+{
+    public string? CustomerName { get; set; }
+    public string? CustomerPhone { get; set; }
+    public double DiscountPercent { get; set; } = 0;
+    public string PaymentMethod { get; set; } = "VietQR";
+    public string PaymentStatus { get; set; } = "Completed"; // "Completed" | "Cancelled"
+    public string? Note { get; set; }
+}
+
 public class VietQrResponseDto
 {
     public string QrImageUrl { get; set; } = string.Empty;
@@ -83,9 +93,21 @@ public class DashboardSummaryDto
     public List<TopItemDto> TopServices { get; set; } = new();
     public List<TopItemDto> TopProducts { get; set; } = new();
     public List<ExpenseCategoryDto> ExpenseCategories { get; set; } = new();
+    // Biến động chi tiêu qua các tháng (Monthly Expense Trend)
+    public List<MonthlyExpenseTrendDto> MonthlyExpenseTrend { get; set; } = new();
 
     // Danh sách doanh thu & lợi nhuận chi tiết từng ngày trong tháng
     public List<DailyReportItemDto> DailyBreakdown { get; set; } = new();
+}
+
+public class MonthlyExpenseTrendDto
+{
+    public string MonthKey { get; set; } = string.Empty; // "2026-09"
+    public string MonthName { get; set; } = string.Empty; // "T09/26"
+    public decimal TotalExpense { get; set; }
+    public int ExpensesCount { get; set; }
+    public decimal TotalRevenue { get; set; }
+    public decimal NetProfit { get; set; }
 }
 
 public class DailyReportItemDto

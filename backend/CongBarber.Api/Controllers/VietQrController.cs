@@ -1,3 +1,4 @@
+using CongBarber.Api.Data;
 using CongBarber.Api.Dtos;
 using CongBarber.Api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -9,19 +10,31 @@ namespace CongBarber.Api.Controllers;
 public class VietQrController : ControllerBase
 {
     private readonly IVietQrService _vietQrService;
+    private readonly AppDbContext _context;
 
-    public VietQrController(IVietQrService vietQrService)
+    public VietQrController(IVietQrService vietQrService, AppDbContext context)
     {
         _vietQrService = vietQrService;
+        _context = context;
     }
 
     [HttpGet("generate")]
     public async Task<ActionResult<VietQrResponseDto>> Generate(
-        [FromQuery] decimal amount,
-        [FromQuery] string orderCode,
+        [FromQuery] decimal amount = 0,
+        [FromQuery] string? orderCode = null,
         [FromQuery] string? description = null)
     {
-        var result = await _vietQrService.GenerateQrAsync(amount, orderCode, description);
+        string safeOrderCode = string.IsNullOrWhiteSpace(orderCode) ? "DIROPOS" : orderCode;
+        var result = await _vietQrService.GenerateQrAsync(amount, safeOrderCode, description);
+        return Ok(result);
+    }
+
+    [HttpGet("order/{orderId}")]
+    public async Task<ActionResult<VietQrResponseDto>> GenerateForOrder(int orderId)
+    {
+        var order = await _context.Orders.FindAsync(orderId);
+        if (order == null) return NotFound("Không tìm thấy đơn hàng");
+        var result = await _vietQrService.GenerateQrAsync(order.FinalAmount, order.OrderCode, order.CustomerName);
         return Ok(result);
     }
 

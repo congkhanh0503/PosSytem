@@ -15,6 +15,9 @@ public class BackupController : ControllerBase
 
     private string GetDbPath()
     {
+        string? envPath = Environment.GetEnvironmentVariable("DB_PATH");
+        if (!string.IsNullOrEmpty(envPath)) return envPath;
+
         string fullPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "congbarber.db");
         if (System.IO.File.Exists(fullPath)) return fullPath;
         if (System.IO.File.Exists("congbarber.db")) return "congbarber.db";

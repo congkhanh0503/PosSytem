@@ -1,14 +1,14 @@
 <template>
-  <div class="p-6 space-y-6 overflow-y-auto h-screen max-w-6xl mx-auto">
+  <div class="p-6 space-y-6 overflow-y-auto h-screen max-w-6xl mx-auto bg-slate-50 text-slate-800">
     <!-- Header & Action Button -->
-    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-barber-border pb-4">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-200 pb-4">
       <div>
-        <h2 class="text-2xl font-extrabold text-white">Quản Lý Chi Tiêu Tiệm</h2>
-        <p class="text-xs text-zinc-400 mt-0.5">Theo dõi tiền mặt bằng, điện nước, nhập phụ liệu, dao cạo và chi phí vận hành</p>
+        <h2 class="text-2xl font-black text-slate-900 tracking-tight">Quản Lý Chi Phí Doanh Nghiệp</h2>
+        <p class="text-xs text-slate-500 mt-0.5 font-medium">Theo dõi tiền mặt bằng, điện nước, nhập vật tư và chi phí vận hành hàng ngày</p>
       </div>
       <button
         @click="openModal()"
-        class="py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-extrabold text-xs shadow-lg shadow-amber-500/20 transition flex items-center gap-2 active:scale-95 self-start sm:self-auto"
+        class="py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-500/25 transition flex items-center gap-2 active:scale-95 self-start sm:self-auto"
       >
         <Plus class="w-4 h-4" />
         Thêm Khoản Chi Mới
@@ -17,44 +17,44 @@
 
     <!-- Quick Stat Overview Cards (3 Cards) -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <div class="p-4 rounded-2xl bg-barber-card border border-barber-border relative overflow-hidden">
+      <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs relative overflow-hidden">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-xs text-zinc-400 uppercase font-medium">Chi Tiêu Hôm Nay</span>
-          <div class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center">
+          <span class="text-xs text-slate-500 uppercase font-semibold">Chi Tiêu Hôm Nay</span>
+          <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
             <ArrowDownRight class="w-4 h-4" />
           </div>
         </div>
-        <h3 class="text-xl font-extrabold text-rose-400">{{ formatCurrency(todayTotal) }}</h3>
-        <p class="text-[11px] text-zinc-500 mt-1">Các khoản chi phát sinh trong ngày</p>
+        <h3 class="text-xl font-black text-rose-600">{{ formatCurrency(todayTotal) }}</h3>
+        <p class="text-[11px] text-slate-400 mt-1">Các khoản chi phát sinh trong ngày</p>
       </div>
 
-      <div class="p-4 rounded-2xl bg-barber-card border border-barber-border relative overflow-hidden">
+      <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs relative overflow-hidden">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-xs text-zinc-400 uppercase font-medium">Tổng Chi Tháng Này</span>
-          <div class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center">
+          <span class="text-xs text-slate-500 uppercase font-semibold">Tổng Chi Tháng Này</span>
+          <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
             <Calendar class="w-4 h-4" />
           </div>
         </div>
-        <h3 class="text-xl font-extrabold text-purple-300">{{ formatCurrency(monthTotal) }}</h3>
-        <p class="text-[11px] text-zinc-500 mt-1">Bao gồm điện nước, mặt bằng, phụ liệu</p>
+        <h3 class="text-xl font-black text-purple-700">{{ formatCurrency(monthTotal) }}</h3>
+        <p class="text-[11px] text-slate-400 mt-1">Bao gồm điện nước, mặt bằng, vật tư</p>
       </div>
 
-      <div class="p-4 rounded-2xl bg-barber-card border border-barber-border relative overflow-hidden">
+      <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs relative overflow-hidden">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-xs text-zinc-400 uppercase font-medium">Khoản Chi Gần Nhất</span>
-          <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-barber-gold flex items-center justify-center">
+          <span class="text-xs text-slate-500 uppercase font-semibold">Khoản Chi Gần Nhất</span>
+          <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
             <Receipt class="w-4 h-4" />
           </div>
         </div>
-        <h3 class="text-sm font-bold text-white truncate">{{ latestExpense?.title || 'Chưa có' }}</h3>
-        <p class="text-[11px] text-amber-200 mt-1 font-semibold">
+        <h3 class="text-sm font-bold text-slate-900 truncate">{{ latestExpense?.title || 'Chưa có' }}</h3>
+        <p class="text-[11px] text-indigo-600 mt-1 font-bold">
           {{ latestExpense ? formatCurrency(latestExpense.amount) : '0 ₫' }}
         </p>
       </div>
     </div>
 
     <!-- BỘ LỌC LỊCH THÔNG MINH (SMART DATE FILTER) -->
-    <div class="bg-barber-card border border-barber-border rounded-2xl p-4 space-y-3.5 shadow-xl">
+    <div class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3.5 shadow-xs">
       <!-- Preset Buttons & Category Select -->
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 text-xs">
@@ -63,7 +63,7 @@
             :key="preset.id"
             @click="applyPreset(preset.id)"
             class="px-3.5 py-1.5 rounded-xl font-bold transition-all duration-200 whitespace-nowrap flex items-center gap-1.5"
-            :class="selectedPreset === preset.id ? 'bg-barber-gold text-black shadow-md shadow-amber-500/20' : 'bg-zinc-800/80 text-zinc-400 hover:bg-zinc-800 hover:text-white'"
+            :class="selectedPreset === preset.id ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200/80'"
           >
             <Calendar class="w-3.5 h-3.5" />
             <span>{{ preset.label }}</span>
@@ -74,7 +74,7 @@
           <select
             v-model="filters.category"
             @change="loadExpenses"
-            class="bg-barber-dark border border-zinc-700 rounded-xl px-3 py-1.5 text-white focus:outline-none focus:border-barber-gold"
+            class="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-slate-800 focus:outline-none focus:border-indigo-500 shadow-2xs"
           >
             <option value="">Tất cả danh mục</option>
             <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
@@ -82,7 +82,7 @@
 
           <button
             @click="resetFilters"
-            class="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition"
+            class="p-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 transition shadow-2xs"
             title="Xóa bộ lọc"
           >
             <RotateCcw class="w-3.5 h-3.5" />
@@ -91,34 +91,34 @@
       </div>
 
       <!-- Custom Date Pickers (Khi chọn Tùy chọn) -->
-      <div v-if="selectedPreset === 'custom'" class="flex flex-wrap items-center gap-3 pt-3 border-t border-zinc-800 text-xs animate-fade-in">
-        <span class="text-zinc-400 font-medium">Khoảng ngày chi:</span>
+      <div v-if="selectedPreset === 'custom'" class="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-100 text-xs animate-fade-in">
+        <span class="text-slate-500 font-semibold">Khoảng ngày chi:</span>
         <div class="flex items-center gap-2">
-          <label class="text-zinc-500">Từ:</label>
+          <label class="text-slate-400">Từ:</label>
           <input
             v-model="filters.fromDate"
             type="date"
             @change="loadExpenses"
-            class="bg-barber-dark border border-zinc-700 rounded-xl px-3 py-1.5 text-white focus:outline-none focus:border-barber-gold"
+            class="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-slate-800 focus:outline-none focus:border-indigo-500 shadow-2xs"
           />
         </div>
         <div class="flex items-center gap-2">
-          <label class="text-zinc-500">Đến:</label>
+          <label class="text-slate-400">Đến:</label>
           <input
             v-model="filters.toDate"
             type="date"
             @change="loadExpenses"
-            class="bg-barber-dark border border-zinc-700 rounded-xl px-3 py-1.5 text-white focus:outline-none focus:border-barber-gold"
+            class="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-slate-800 focus:outline-none focus:border-indigo-500 shadow-2xs"
           />
         </div>
       </div>
     </div>
 
     <!-- Expenses Table -->
-    <div class="bg-barber-card border border-barber-border rounded-2xl overflow-hidden shadow-xl">
+    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs">
-          <thead class="bg-zinc-900/80 text-zinc-400 uppercase tracking-wider font-semibold border-b border-barber-border">
+          <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider font-bold text-[11px] border-b border-slate-200">
             <tr>
               <th class="py-3.5 px-4">Tên Khoản Chi</th>
               <th class="py-3.5 px-4">Phân Loại</th>
@@ -128,48 +128,48 @@
               <th class="py-3.5 px-4 text-right">Thao Tác</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-zinc-800/60">
+          <tbody class="divide-y divide-slate-100 font-medium">
             <tr v-if="expenses.length === 0">
-              <td colspan="6" class="py-12 text-center text-zinc-500">
+              <td colspan="6" class="py-12 text-center text-slate-400">
                 Không tìm thấy khoản chi tiêu nào
               </td>
             </tr>
 
-            <tr v-for="exp in expenses" :key="exp.id" class="hover:bg-zinc-800/40 transition">
+            <tr v-for="exp in expenses" :key="exp.id" class="hover:bg-slate-50/80 transition">
               <td class="py-3.5 px-4">
-                <p class="font-bold text-white text-sm">{{ exp.title }}</p>
+                <p class="font-bold text-slate-900 text-sm">{{ exp.title }}</p>
               </td>
               <td class="py-3.5 px-4">
                 <span 
-                  class="px-2 py-0.5 rounded font-medium text-[11px]"
+                  class="px-2 py-0.5 rounded font-bold text-[11px]"
                   :class="getCategoryBadgeClass(exp.category)"
                 >
                   {{ exp.category }}
                 </span>
               </td>
-              <td class="py-3.5 px-4 font-extrabold text-rose-400 text-sm">
+              <td class="py-3.5 px-4 font-black text-rose-600 text-sm">
                 -{{ formatCurrency(exp.amount) }}
               </td>
-              <td class="py-3.5 px-4 text-zinc-300">
+              <td class="py-3.5 px-4 text-slate-600">
                 {{ formatDate(exp.date) }}
               </td>
               <td class="py-3.5 px-4 max-w-[220px]">
-                <span v-if="exp.note" class="text-zinc-400 truncate block" :title="exp.note">
+                <span v-if="exp.note" class="text-slate-500 truncate block" :title="exp.note">
                   {{ exp.note }}
                 </span>
-                <span v-else class="text-zinc-600">—</span>
+                <span v-else class="text-slate-300">—</span>
               </td>
               <td class="py-3.5 px-4 text-right space-x-2">
                 <button 
                   @click="openModal(exp)"
-                  class="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white transition"
+                  class="p-1.5 rounded-lg bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 transition"
                   title="Sửa"
                 >
                   <Edit3 class="w-4 h-4" />
                 </button>
                 <button 
                   @click="deleteExpense(exp.id)"
-                  class="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition"
+                  class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition"
                   title="Xóa"
                 >
                   <Trash2 class="w-4 h-4" />
@@ -182,64 +182,83 @@
     </div>
 
     <!-- Modal Form (Thêm/Sửa Khoản Chi) -->
-    <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div class="relative w-full max-w-md bg-barber-card border border-barber-border rounded-2xl shadow-2xl p-6">
-        <h3 class="text-lg font-bold text-white mb-4">
+    <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+      <div class="relative w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-2xl p-6">
+        <h3 class="text-lg font-bold text-slate-900 mb-4">
           {{ editingId ? 'Chỉnh Sửa Khoản Chi' : 'Thêm Khoản Chi Mới' }}
         </h3>
 
         <form @submit.prevent="saveExpense" class="space-y-4 text-xs">
           <div>
-            <label class="block text-zinc-400 mb-1 font-medium">Tên khoản chi *</label>
+            <label class="block text-slate-600 mb-1 font-medium">Tên khoản chi *</label>
             <input
               v-model="form.title"
               type="text"
               required
-              placeholder="VD: Mua lưỡi lam & bọt cạo râu"
-              class="w-full bg-barber-dark border border-zinc-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-barber-gold"
+              placeholder="VD: Mua vật tư văn phòng"
+              class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-indigo-500 shadow-2xs"
             />
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-zinc-400 mb-1 font-medium">Số tiền chi (VNĐ) *</label>
-              <input
-                v-model.number="form.amount"
-                type="number"
-                min="1000"
-                step="5000"
-                required
-                class="w-full bg-barber-dark border border-zinc-700 rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-barber-gold"
-              />
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="block text-slate-600 font-medium">Số tiền chi (VNĐ) *</label>
+              <span v-if="form.amount > 0" class="text-xs font-bold text-indigo-600">
+                👉 {{ formatCurrency(form.amount) }}
+              </span>
             </div>
-            <div>
-              <label class="block text-zinc-400 mb-1 font-medium">Ngày chi *</label>
-              <input
-                v-model="form.date"
-                type="date"
-                required
-                class="w-full bg-barber-dark border border-zinc-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-barber-gold"
-              />
+            <input
+              v-model.number="form.amount"
+              type="number"
+              min="0"
+              step="any"
+              required
+              placeholder="VD: 50000"
+              class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-bold focus:outline-none focus:border-indigo-500 shadow-2xs"
+            />
+            
+            <!-- Nút chọn nhanh số tiền -->
+            <div class="flex items-center gap-1.5 mt-2 overflow-x-auto no-scrollbar pb-0.5">
+              <button
+                v-for="presetAmt in [20000, 50000, 100000, 200000, 500000]"
+                :key="presetAmt"
+                type="button"
+                @click="form.amount = presetAmt"
+                class="px-2 py-1 rounded-lg text-[10px] font-bold transition border"
+                :class="form.amount === presetAmt ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'"
+              >
+                {{ formatCurrency(presetAmt) }}
+              </button>
             </div>
           </div>
 
           <div>
-            <label class="block text-zinc-400 mb-1 font-medium">Phân loại danh mục</label>
+            <label class="block text-slate-600 mb-1 font-medium">Ngày chi *</label>
+            <input
+              v-model="form.date"
+              type="date"
+              required
+              class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-indigo-500 shadow-2xs"
+            />
+          </div>
+
+          <div>
+            <label class="block text-slate-600 mb-1 font-medium">Phân loại danh mục</label>
             <select
               v-model="form.category"
-              class="w-full bg-barber-dark border border-zinc-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-barber-gold"
+              class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-indigo-500 shadow-2xs"
             >
               <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
             </select>
           </div>
 
           <div>
-            <label class="block text-zinc-400 mb-1 font-medium">Ghi chú</label>
+            <label class="block text-slate-600 mb-1 font-medium">Ghi chú</label>
             <textarea
               v-model="form.note"
               rows="2"
               placeholder="Chi tiết nơi mua, lý do chi tiêu..."
-              class="w-full bg-barber-dark border border-zinc-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-barber-gold"
+              class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-indigo-500 shadow-2xs"
             ></textarea>
           </div>
 
@@ -247,13 +266,13 @@
             <button
               type="button"
               @click="isModalOpen = false"
-              class="flex-1 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold transition"
+              class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition"
             >
               Hủy
             </button>
             <button
               type="submit"
-              class="flex-1 py-2.5 rounded-xl bg-barber-gold hover:bg-amber-400 text-black font-bold transition"
+              class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition shadow-sm"
             >
               Lưu Khoản Chi
             </button>
@@ -273,16 +292,24 @@ import { Plus, Edit3, Trash2, ArrowDownRight, Calendar, Receipt, RotateCcw } fro
 const expenses = ref([])
 const categories = ref([
   'Mặt bằng & Tiện ích',
-  'Phụ liệu & Hóa chất',
-  'Dụng cụ & Máy móc',
-  'Sinh hoạt & Ăn uống',
-  'Marketing & Quảng cáo',
+  'Vật tư & Hàng hóa',
+  'Thiết bị & Công cụ',
+  'Sinh hoạt & Tiếp khách',
+  'Marketing & Quảng bá',
   'Khác'
 ])
 
 const isModalOpen = ref(false)
 const editingId = ref(null)
 const selectedPreset = ref('today')
+
+const form = ref({
+  title: '',
+  amount: 50000,
+  category: 'Vật tư & Hàng hóa',
+  date: new Date().toISOString().split('T')[0],
+  note: ''
+})
 
 const datePresets = [
   { id: 'today', label: 'Hôm nay' },
@@ -330,7 +357,7 @@ function applyPreset(presetId) {
     filters.value.toDate = getISODate(now)
   } else if (presetId === 'lastMonth') {
     const start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-    const end = new Date(now.getFullYear(), now.getMonth(), 0) // Ngày cuối cùng của tháng trước
+    const end = new Date(now.getFullYear(), now.getMonth(), 0)
     filters.value.fromDate = getISODate(start)
     filters.value.toDate = getISODate(end)
   } else if (presetId === 'custom') {
@@ -373,85 +400,23 @@ onMounted(() => {
 })
 
 const todayTotal = computed(() => {
-  const todayStr = new Date().toISOString().split('T')[0]
+  const today = getISODate(new Date())
   return expenses.value
-    .filter(e => e.date?.startsWith(todayStr))
+    .filter(e => e.date && e.date.startsWith(today))
     .reduce((sum, e) => sum + e.amount, 0)
 })
 
 const monthTotal = computed(() => {
-  const currentMonth = new Date().getMonth()
-  const currentYear = new Date().getFullYear()
+  const currentMonth = getISODate(new Date()).substring(0, 7)
   return expenses.value
-    .filter(e => {
-      const d = new Date(e.date)
-      return d.getMonth() === currentMonth && d.getFullYear() === currentYear
-    })
+    .filter(e => e.date && e.date.startsWith(currentMonth))
     .reduce((sum, e) => sum + e.amount, 0)
 })
 
 const latestExpense = computed(() => {
-  return expenses.value[0] || null
+  if (expenses.value.length === 0) return null
+  return expenses.value[0]
 })
-
-function resetFilters() {
-  filters.value.date = ''
-  filters.value.category = ''
-  loadExpenses()
-}
-
-function openModal(exp = null) {
-  if (exp) {
-    editingId.value = exp.id
-    form.value = {
-      title: exp.title,
-      amount: exp.amount,
-      category: exp.category,
-      date: exp.date ? exp.date.split('T')[0] : new Date().toISOString().split('T')[0],
-      note: exp.note || ''
-    }
-  } else {
-    editingId.value = null
-    form.value = {
-      title: '',
-      amount: 50000,
-      category: 'Phụ liệu & Hóa chất',
-      date: new Date().toISOString().split('T')[0],
-      note: ''
-    }
-  }
-  isModalOpen.value = true
-}
-
-async function saveExpense() {
-  try {
-    const payload = {
-      ...form.value,
-      date: new Date(form.value.date).toISOString()
-    }
-
-    if (editingId.value) {
-      await api.updateExpense(editingId.value, { ...payload, id: editingId.value })
-    } else {
-      await api.createExpense(payload)
-    }
-
-    isModalOpen.value = false
-    loadExpenses()
-  } catch (err) {
-    alert('Lỗi khi lưu khoản chi: ' + (err.response?.data || err.message))
-  }
-}
-
-async function deleteExpense(id) {
-  if (!confirm('Bạn có chắc muốn xóa khoản chi này?')) return
-  try {
-    await api.deleteExpense(id)
-    loadExpenses()
-  } catch (err) {
-    alert('Không thể xóa: ' + err.message)
-  }
-}
 
 function formatCurrency(val) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0)
@@ -465,18 +430,64 @@ function formatDate(dateStr) {
 
 function getCategoryBadgeClass(cat) {
   switch (cat) {
-    case 'Mặt bằng & Tiện ích':
-      return 'bg-purple-500/10 text-purple-300 border border-purple-500/30'
-    case 'Phụ liệu & Hóa chất':
-      return 'bg-amber-500/10 text-barber-gold border border-amber-500/30'
-    case 'Dụng cụ & Máy móc':
-      return 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/30'
-    case 'Sinh hoạt & Ăn uống':
-      return 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30'
-    case 'Marketing & Quảng cáo':
-      return 'bg-blue-500/10 text-blue-300 border border-blue-500/30'
-    default:
-      return 'bg-zinc-800 text-zinc-400'
+    case 'Mặt bằng & Tiện ích': return 'bg-amber-50 text-amber-700 border border-amber-200'
+    case 'Vật tư & Hàng hóa': return 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+    case 'Thiết bị & Công cụ': return 'bg-blue-50 text-blue-700 border border-blue-200'
+    case 'Sinh hoạt & Tiếp khách': return 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+    case 'Marketing & Quảng bá': return 'bg-purple-50 text-purple-700 border border-purple-200'
+    default: return 'bg-slate-100 text-slate-700 border border-slate-200'
+  }
+}
+
+function resetFilters() {
+  filters.value.category = ''
+  applyPreset('today')
+}
+
+function openModal(exp = null) {
+  if (exp) {
+    editingId.value = exp.id
+    form.value = {
+      title: exp.title,
+      amount: exp.amount,
+      category: exp.category,
+      date: exp.date.split('T')[0],
+      note: exp.note || ''
+    }
+  } else {
+    editingId.value = null
+    form.value = {
+      title: '',
+      amount: 50000,
+      category: categories.value[0] || 'Vật tư & Hàng hóa',
+      date: getISODate(new Date()),
+      note: ''
+    }
+  }
+  isModalOpen.value = true
+}
+
+async function saveExpense() {
+  try {
+    if (editingId.value) {
+      await api.updateExpense(editingId.value, { ...form.value, id: editingId.value })
+    } else {
+      await api.createExpense(form.value)
+    }
+    isModalOpen.value = false
+    loadExpenses()
+  } catch (err) {
+    alert('Lỗi lưu khoản chi: ' + err.message)
+  }
+}
+
+async function deleteExpense(id) {
+  if (!confirm('Bạn có chắc chắn muốn xóa khoản chi này?')) return
+  try {
+    await api.deleteExpense(id)
+    loadExpenses()
+  } catch (err) {
+    alert('Không thể xóa: ' + err.message)
   }
 }
 </script>

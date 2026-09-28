@@ -1,13 +1,13 @@
 <template>
-  <div class="p-6 space-y-6 overflow-y-auto h-screen max-w-7xl mx-auto">
+  <div class="p-6 space-y-6 overflow-y-auto h-screen max-w-7xl mx-auto bg-slate-50 text-slate-800">
     <!-- Header -->
-    <div class="border-b border-barber-border pb-4">
-      <h2 class="text-2xl font-extrabold text-white">Lịch Sử Đơn Hàng Điện Tử</h2>
-      <p class="text-xs text-zinc-400 mt-0.5">Quản lý giao dịch, lọc theo lịch và đối soát doanh thu theo khoảng thời gian</p>
+    <div class="border-b border-slate-200 pb-4">
+      <h2 class="text-2xl font-black text-slate-900 tracking-tight">Lịch Sử Đơn Hàng Điện Tử</h2>
+      <p class="text-xs text-slate-500 mt-0.5 font-medium">Quản lý giao dịch, sửa thông tin, xóa đơn và đối soát doanh thu theo khoảng thời gian</p>
     </div>
 
     <!-- BỘ LỌC LỊCH THÔNG MINH (SMART DATE FILTER) -->
-    <div class="bg-barber-card border border-barber-border rounded-2xl p-4 space-y-4 shadow-xl">
+    <div class="bg-white border border-slate-200 rounded-2xl p-4 space-y-4 shadow-xs">
       
       <!-- Hàng 1: Các nút chọn nhanh khoảng thời gian -->
       <div class="flex flex-wrap items-center justify-between gap-3">
@@ -17,7 +17,7 @@
             :key="preset.id"
             @click="applyPreset(preset.id)"
             class="px-3.5 py-1.5 rounded-xl font-bold transition-all duration-200 whitespace-nowrap flex items-center gap-1.5"
-            :class="selectedPreset === preset.id ? 'bg-barber-gold text-black shadow-md shadow-amber-500/20' : 'bg-zinc-800/80 text-zinc-400 hover:bg-zinc-800 hover:text-white'"
+            :class="selectedPreset === preset.id ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200/80'"
           >
             <Calendar class="w-3.5 h-3.5" />
             <span>{{ preset.label }}</span>
@@ -29,7 +29,7 @@
           <select
             v-model="filters.paymentMethod"
             @change="loadOrders"
-            class="bg-barber-dark border border-zinc-700 rounded-xl px-3 py-1.5 text-white focus:outline-none focus:border-barber-gold"
+            class="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-slate-800 focus:outline-none focus:border-indigo-500 shadow-2xs"
           >
             <option value="">Tất cả hình thức</option>
             <option value="VietQR">VietQR</option>
@@ -39,7 +39,7 @@
           <select
             v-model="filters.status"
             @change="loadOrders"
-            class="bg-barber-dark border border-zinc-700 rounded-xl px-3 py-1.5 text-white focus:outline-none focus:border-barber-gold"
+            class="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-slate-800 focus:outline-none focus:border-indigo-500 shadow-2xs"
           >
             <option value="">Tất cả trạng thái</option>
             <option value="Completed">Đã thanh toán</option>
@@ -48,7 +48,7 @@
 
           <button
             @click="resetFilters"
-            class="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition"
+            class="p-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 transition shadow-2xs"
             title="Làm mới bộ lọc"
           >
             <RotateCcw class="w-3.5 h-3.5" />
@@ -57,51 +57,51 @@
       </div>
 
       <!-- Hàng 2: Input Từ Ngày - Đến Ngày (Khi chọn Tùy chọn) -->
-      <div v-if="selectedPreset === 'custom'" class="flex flex-wrap items-center gap-3 pt-3 border-t border-zinc-800 text-xs animate-fade-in">
-        <span class="text-zinc-400 font-medium">Khoảng ngày:</span>
+      <div v-if="selectedPreset === 'custom'" class="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-100 text-xs animate-fade-in">
+        <span class="text-slate-500 font-semibold">Khoảng ngày:</span>
         <div class="flex items-center gap-2">
-          <label class="text-zinc-500">Từ:</label>
+          <label class="text-slate-400">Từ:</label>
           <input
             v-model="filters.fromDate"
             type="date"
             @change="loadOrders"
-            class="bg-barber-dark border border-zinc-700 rounded-xl px-3 py-1.5 text-white focus:outline-none focus:border-barber-gold"
+            class="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-slate-800 focus:outline-none focus:border-indigo-500 shadow-2xs"
           />
         </div>
         <div class="flex items-center gap-2">
-          <label class="text-zinc-500">Đến:</label>
+          <label class="text-slate-400">Đến:</label>
           <input
             v-model="filters.toDate"
             type="date"
             @change="loadOrders"
-            class="bg-barber-dark border border-zinc-700 rounded-xl px-3 py-1.5 text-white focus:outline-none focus:border-barber-gold"
+            class="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-slate-800 focus:outline-none focus:border-indigo-500 shadow-2xs"
           />
         </div>
       </div>
 
       <!-- Hàng 3: Thống kê nhanh của kết quả lọc (Metrics Summary) -->
-      <div class="pt-3 border-t border-zinc-800 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-        <div class="p-2.5 rounded-xl bg-barber-dark/70 border border-zinc-800 flex justify-between items-center">
-          <span class="text-zinc-400">Số lượng đơn:</span>
-          <span class="font-extrabold text-white text-sm">{{ orders.length }} đơn</span>
+      <div class="pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex justify-between items-center">
+          <span class="text-slate-500 font-medium">Số lượng đơn:</span>
+          <span class="font-extrabold text-slate-900 text-sm">{{ orders.length }} đơn</span>
         </div>
-        <div class="p-2.5 rounded-xl bg-barber-dark/70 border border-zinc-800 flex justify-between items-center">
-          <span class="text-zinc-400">Tổng tiền đã giảm giá:</span>
-          <span class="font-bold text-emerald-400">{{ formatCurrency(totalFilteredDiscount) }}</span>
+        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex justify-between items-center">
+          <span class="text-slate-500 font-medium">Tổng tiền đã giảm giá:</span>
+          <span class="font-bold text-emerald-600">{{ formatCurrency(totalFilteredDiscount) }}</span>
         </div>
-        <div class="p-2.5 rounded-xl bg-barber-dark/70 border border-zinc-800 flex justify-between items-center">
-          <span class="text-zinc-400">Tổng doanh thu thực nhận:</span>
-          <span class="font-extrabold text-barber-gold text-base">{{ formatCurrency(totalFilteredRevenue) }}</span>
+        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex justify-between items-center">
+          <span class="text-slate-500 font-medium">Tổng doanh thu thực nhận:</span>
+          <span class="font-black text-indigo-600 text-base">{{ formatCurrency(totalFilteredRevenue) }}</span>
         </div>
       </div>
 
     </div>
 
     <!-- Orders Table -->
-    <div class="bg-barber-card border border-barber-border rounded-2xl overflow-hidden shadow-xl">
+    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs">
-          <thead class="bg-zinc-900/80 text-zinc-400 uppercase tracking-wider font-semibold border-b border-barber-border">
+          <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider font-bold text-[11px] border-b border-slate-200">
             <tr>
               <th class="py-3.5 px-4">Mã Đơn</th>
               <th class="py-3.5 px-4">Thời Gian</th>
@@ -112,12 +112,12 @@
               <th class="py-3.5 px-4">Thanh Toán</th>
               <th class="py-3.5 px-4">Ghi Chú</th>
               <th class="py-3.5 px-4">Trạng Thái</th>
-              <th class="py-3.5 px-4 text-right">Chi Tiết</th>
+              <th class="py-3.5 px-4 text-right">Thao Tác</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-zinc-800/60">
+          <tbody class="divide-y divide-slate-100 font-medium">
             <tr v-if="orders.length === 0">
-              <td colspan="10" class="py-12 text-center text-zinc-500">
+              <td colspan="10" class="py-12 text-center text-slate-400">
                 Không tìm thấy đơn hàng nào trong khoảng thời gian này
               </td>
             </tr>
@@ -125,57 +125,74 @@
             <tr 
               v-for="order in orders" 
               :key="order.id" 
-              @click="openDetail(order)"
-              class="hover:bg-zinc-800/40 cursor-pointer transition"
+              class="hover:bg-slate-50/80 transition"
             >
-              <td class="py-3.5 px-4">
-                <span class="font-mono font-bold text-amber-200">
+              <td class="py-3.5 px-4 cursor-pointer" @click="openDetail(order)">
+                <span class="font-mono font-bold text-indigo-600 hover:underline">
                   {{ order.orderCode }}
                 </span>
               </td>
-              <td class="py-3.5 px-4 text-zinc-400">
+              <td class="py-3.5 px-4 text-slate-500 cursor-pointer" @click="openDetail(order)">
                 {{ formatDateTime(order.createdAt) }}
               </td>
-              <td class="py-3.5 px-4 font-medium text-white">
+              <td class="py-3.5 px-4 font-bold text-slate-900 cursor-pointer" @click="openDetail(order)">
                 {{ order.customerName || 'Khách vãng lai' }}
               </td>
-              <td class="py-3.5 px-4 text-zinc-400">
+              <td class="py-3.5 px-4 text-slate-600 cursor-pointer" @click="openDetail(order)">
                 {{ formatCurrency(order.subTotal) }}
               </td>
-              <td class="py-3.5 px-4">
-                <span v-if="order.discountPercent > 0" class="text-emerald-400 font-bold">
+              <td class="py-3.5 px-4 cursor-pointer" @click="openDetail(order)">
+                <span v-if="order.discountPercent > 0" class="text-emerald-600 font-bold">
                   -{{ formatCurrency(order.discountAmount) }} ({{ order.discountPercent }}%)
                 </span>
-                <span v-else class="text-zinc-600">0%</span>
+                <span v-else class="text-slate-400">0%</span>
               </td>
-              <td class="py-3.5 px-4 font-extrabold text-barber-gold text-sm">
+              <td class="py-3.5 px-4 font-black text-indigo-600 text-sm cursor-pointer" @click="openDetail(order)">
                 {{ formatCurrency(order.finalAmount) }}
               </td>
-              <td class="py-3.5 px-4">
+              <td class="py-3.5 px-4 cursor-pointer" @click="openDetail(order)">
                 <span 
-                  class="px-2 py-0.5 rounded font-medium text-[11px]"
-                  :class="order.paymentMethod === 'VietQR' ? 'bg-amber-500/10 text-barber-gold border border-amber-500/30' : 'bg-zinc-800 text-zinc-300'"
+                  class="px-2 py-0.5 rounded font-semibold text-[11px]"
+                  :class="order.paymentMethod === 'VietQR' ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'bg-slate-100 text-slate-700'"
                 >
                   {{ order.paymentMethod }}
                 </span>
               </td>
-              <td class="py-3.5 px-4 max-w-[180px]">
-                <p v-if="order.note" class="truncate text-amber-100/80 italic" :title="order.note">
+              <td class="py-3.5 px-4 max-w-[180px] cursor-pointer" @click="openDetail(order)">
+                <p v-if="order.note" class="truncate text-slate-600 italic" :title="order.note">
                   {{ order.note }}
                 </p>
-                <span v-else class="text-zinc-600">—</span>
+                <span v-else class="text-slate-300">—</span>
               </td>
-              <td class="py-3.5 px-4">
+              <td class="py-3.5 px-4 cursor-pointer" @click="openDetail(order)">
                 <span 
                   class="px-2 py-0.5 rounded-full font-bold text-[10px]"
-                  :class="order.paymentStatus === 'Completed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'"
+                  :class="order.paymentStatus === 'Completed' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'"
                 >
                   {{ order.paymentStatus === 'Completed' ? 'Hoàn tất' : 'Đã hủy' }}
                 </span>
               </td>
-              <td class="py-3.5 px-4 text-right">
-                <button class="text-barber-gold hover:text-amber-300 font-semibold text-xs">
-                  Xem ➜
+              <td class="py-3.5 px-4 text-right space-x-1.5 whitespace-nowrap">
+                <button 
+                  @click.stop="openDetail(order)"
+                  class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition"
+                  title="Xem chi tiết"
+                >
+                  <Eye class="w-3.5 h-3.5" />
+                </button>
+                <button 
+                  @click.stop="openEditModal(order)"
+                  class="p-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition"
+                  title="Chỉnh sửa đơn"
+                >
+                  <Edit3 class="w-3.5 h-3.5" />
+                </button>
+                <button 
+                  @click.stop="handleDeleteOrder(order.id)"
+                  class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition"
+                  title="Xóa đơn hàng"
+                >
+                  <Trash2 class="w-3.5 h-3.5" />
                 </button>
               </td>
             </tr>
@@ -184,13 +201,121 @@
       </div>
     </div>
 
-    <!-- Order Detail Modal -->
+    <!-- Modal Chi Tiết Đơn Hàng -->
     <OrderDetailModal
-      :isOpen="isModalOpen"
+      :is-open="isModalOpen"
       :order="selectedOrder"
       @close="isModalOpen = false"
       @cancel-order="handleCancelOrder"
+      @edit-order="openEditModalFromDetail"
+      @delete-order="handleDeleteOrderFromDetail"
     />
+
+    <!-- Modal Chỉnh Sửa Đơn Hàng -->
+    <div v-if="isEditModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+      <div class="relative w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-2xl p-6">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <Edit3 class="w-5 h-5 text-indigo-600" />
+              Sửa Đơn: {{ editingOrder?.orderCode }}
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">Tiền gốc tạm tính: {{ formatCurrency(editingOrder?.subTotal) }}</p>
+          </div>
+          <button @click="isEditModalOpen = false" class="text-slate-400 hover:text-slate-600 p-1">
+            ✕
+          </button>
+        </div>
+
+        <form @submit.prevent="saveEditOrder" class="space-y-4 text-xs">
+          <div>
+            <label class="block text-slate-600 mb-1 font-medium">Tên khách hàng</label>
+            <input
+              v-model="editForm.customerName"
+              type="text"
+              placeholder="VD: Anh Nam"
+              class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-indigo-500 shadow-2xs"
+            />
+          </div>
+
+          <div>
+            <label class="block text-slate-600 mb-1 font-medium">Số điện thoại</label>
+            <input
+              v-model="editForm.customerPhone"
+              type="text"
+              placeholder="VD: 0912345678"
+              class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-indigo-500 shadow-2xs"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-600 mb-1 font-medium">Hình thức thanh toán</label>
+              <select
+                v-model="editForm.paymentMethod"
+                class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-indigo-500 shadow-2xs"
+              >
+                <option value="VietQR">VietQR</option>
+                <option value="Cash">Tiền mặt</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-slate-600 mb-1 font-medium">Trạng thái</label>
+              <select
+                v-model="editForm.paymentStatus"
+                class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-indigo-500 shadow-2xs"
+              >
+                <option value="Completed">Đã thanh toán</option>
+                <option value="Cancelled">Đã hủy</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="block text-slate-600 font-medium">Giảm giá (%)</label>
+              <span class="text-emerald-600 font-bold">
+                Thực thu mới: {{ formatCurrency(calculatedFinalAmount) }}
+              </span>
+            </div>
+            <input
+              v-model.number="editForm.discountPercent"
+              type="number"
+              min="0"
+              max="100"
+              class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-bold focus:outline-none focus:border-indigo-500 shadow-2xs"
+            />
+          </div>
+
+          <div>
+            <label class="block text-slate-600 mb-1 font-medium">Ghi chú</label>
+            <textarea
+              v-model="editForm.note"
+              rows="2"
+              placeholder="Ghi chú đơn hàng, lý do sửa..."
+              class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-indigo-500 shadow-2xs"
+            ></textarea>
+          </div>
+
+          <div class="flex gap-3 pt-3">
+            <button
+              type="button"
+              @click="isEditModalOpen = false"
+              class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition"
+            >
+              Hủy
+            </button>
+            <button
+              type="submit"
+              class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition shadow-sm"
+            >
+              Lưu Cập Nhật
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
 
   </div>
 </template>
@@ -199,11 +324,23 @@
 import { ref, computed, onMounted } from 'vue'
 import api from '@/services/api'
 import OrderDetailModal from '@/components/OrderDetailModal.vue'
-import { Calendar, RotateCcw } from 'lucide-vue-next'
+import { Calendar, RotateCcw, Edit3, Trash2, Eye } from 'lucide-vue-next'
 
 const orders = ref([])
-const isModalOpen = ref(false)
 const selectedOrder = ref(null)
+const isModalOpen = ref(false)
+
+const isEditModalOpen = ref(null)
+const editingOrder = ref(null)
+const editForm = ref({
+  customerName: '',
+  customerPhone: '',
+  paymentMethod: 'VietQR',
+  paymentStatus: 'Completed',
+  discountPercent: 0,
+  note: ''
+})
+
 const selectedPreset = ref('today')
 
 const datePresets = [
@@ -253,7 +390,7 @@ function applyPreset(presetId) {
     filters.value.toDate = getISODate(now)
   } else if (presetId === 'lastMonth') {
     const start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-    const end = new Date(now.getFullYear(), now.getMonth(), 0) // Ngày cuối cùng của tháng trước
+    const end = new Date(now.getFullYear(), now.getMonth(), 0)
     filters.value.fromDate = getISODate(start)
     filters.value.toDate = getISODate(end)
   } else if (presetId === 'custom') {
@@ -298,6 +435,14 @@ const totalFilteredDiscount = computed(() => {
     .reduce((sum, o) => sum + o.discountAmount, 0)
 })
 
+const calculatedFinalAmount = computed(() => {
+  if (!editingOrder.value) return 0
+  const subTotal = editingOrder.value.subTotal || 0
+  const pct = Math.min(100, Math.max(0, Number(editForm.value.discountPercent) || 0))
+  const discountAmount = Math.round(subTotal * (pct / 100))
+  return Math.max(0, subTotal - discountAmount)
+})
+
 function resetFilters() {
   filters.value.paymentMethod = ''
   filters.value.status = ''
@@ -307,6 +452,50 @@ function resetFilters() {
 function openDetail(order) {
   selectedOrder.value = order
   isModalOpen.value = true
+}
+
+function openEditModal(order) {
+  editingOrder.value = order
+  editForm.value = {
+    customerName: order.customerName || '',
+    customerPhone: order.customerPhone || '',
+    paymentMethod: order.paymentMethod || 'VietQR',
+    paymentStatus: order.paymentStatus || 'Completed',
+    discountPercent: order.discountPercent || 0,
+    note: order.note || ''
+  }
+  isEditModalOpen.value = true
+}
+
+function openEditModalFromDetail(order) {
+  isModalOpen.value = false
+  openEditModal(order)
+}
+
+async function saveEditOrder() {
+  if (!editingOrder.value) return
+  try {
+    await api.updateOrder(editingOrder.value.id, editForm.value)
+    isEditModalOpen.value = false
+    loadOrders()
+  } catch (err) {
+    alert('Không thể lưu cập nhật đơn hàng: ' + (err.response?.data || err.message))
+  }
+}
+
+async function handleDeleteOrder(id) {
+  if (!confirm('Bạn có chắc chắn muốn XÓA VĨNH VIỄN đơn hàng này khỏi hệ thống? Dữ liệu doanh thu sẽ được cập nhật lại.')) return
+  try {
+    await api.deleteOrder(id)
+    loadOrders()
+  } catch (err) {
+    alert('Không thể xóa đơn hàng: ' + (err.response?.data || err.message))
+  }
+}
+
+async function handleDeleteOrderFromDetail(id) {
+  isModalOpen.value = false
+  await handleDeleteOrder(id)
 }
 
 async function handleCancelOrder(id) {
@@ -330,6 +519,7 @@ function formatDateTime(dateStr) {
   return d.toLocaleString('vi-VN', { 
     hour: '2-digit', 
     minute: '2-digit', 
+    second: '2-digit',
     day: '2-digit', 
     month: '2-digit', 
     year: 'numeric' 

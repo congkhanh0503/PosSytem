@@ -33,10 +33,7 @@ export const usePosStore = defineStore('pos', () => {
     )
 
     if (existingIndex > -1) {
-      if (type === 'Product') {
-        cart.value[existingIndex].quantity += 1
-      }
-      // Dịch vụ thì giữ nguyên số lượng 1
+      cart.value[existingIndex].quantity += 1
     } else {
       cart.value.push({
         itemType: type,

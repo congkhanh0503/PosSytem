@@ -15,19 +15,32 @@ export const api = {
   deleteService: (id) => apiClient.delete(`/services/${id}`),
 
   // Products
-  getProducts: (onlyActive = false) => apiClient.get('/products', { params: { onlyActive } }),
+  getProducts: (onlyActive = false, onlyPos = false) => apiClient.get('/products', { params: { onlyActive, onlyPos } }),
   createProduct: (data) => apiClient.post('/products', data),
   updateProduct: (id, data) => apiClient.put(`/products/${id}`, data),
   deleteProduct: (id) => apiClient.delete(`/products/${id}`),
   updateStock: (id, stock) => apiClient.patch(`/products/${id}/stock`, stock, {
     headers: { 'Content-Type': 'application/json' }
   }),
+  toggleShowOnPos: (id) => apiClient.patch(`/products/${id}/toggle-pos`),
 
   // Orders & POS
   getOrders: (params) => apiClient.get('/orders', { params }),
   getOrder: (id) => apiClient.get(`/orders/${id}`),
   createOrder: (orderData) => apiClient.post('/orders', orderData),
+  updateOrder: (id, orderData) => apiClient.put(`/orders/${id}`, orderData),
+  deleteOrder: (id) => apiClient.delete(`/orders/${id}`),
   cancelOrder: (id) => apiClient.post(`/orders/${id}/cancel`),
+
+  // Service Categories
+  getServiceCategories: () => apiClient.get('/servicecategories'),
+  createServiceCategory: (data) => apiClient.post('/servicecategories', data),
+  deleteServiceCategory: (id) => apiClient.delete(`/servicecategories/${id}`),
+
+  // Product Categories
+  getProductCategories: () => apiClient.get('/productcategories'),
+  createProductCategory: (data) => apiClient.post('/productcategories', data),
+  deleteProductCategory: (id) => apiClient.delete(`/productcategories/${id}`),
 
   // Dashboard
   getDashboardSummary: (params) => apiClient.get('/dashboard/summary', { params }),
@@ -40,6 +53,7 @@ export const api = {
   // VietQR
   generateVietQr: (amount, orderCode, description) => 
     apiClient.get('/vietqr/generate', { params: { amount, orderCode, description } }),
+  getVietQrByOrderId: (orderId) => apiClient.get(`/vietqr/order/${orderId}`),
   getPopularBanks: () => apiClient.get('/vietqr/popular-banks'),
 
   // Expenses (Quản lý chi tiêu)

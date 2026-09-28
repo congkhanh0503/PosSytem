@@ -88,8 +88,8 @@ public class OrdersController : ControllerBase
             return BadRequest("Đơn hàng phải có ít nhất 1 dịch vụ hoặc sản phẩm.");
         }
 
-        // 1. Tạo mã đơn hàng duy nhất trong ngày
-        var today = DateTime.UtcNow;
+        // 1. Tạo mã đơn hàng duy nhất trong ngày theo giờ Việt Nam (UTC+7)
+        var today = DateTime.UtcNow.AddHours(7);
         var todayStart = today.Date;
         var todayOrdersCount = await _context.Orders.CountAsync(o => o.CreatedAt >= todayStart);
         string orderCode = $"CB-{today:yyMMdd}-{(todayOrdersCount + 1):D3}";
@@ -186,5 +186,82 @@ public class OrdersController : ControllerBase
 
         await _context.SaveChangesAsync();
         return Ok(order);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateOrder(int id, [FromBody] UpdateOrderDto dto)
+    {
+        var order = await _context.Orders
+            .Include(o => o.Items)
+            .FirstOrDefaultAsync(o => o.Id == id);
+
+        if (order == null) return NotFound();
+
+        // Nếu chuyển từ Completed sang Cancelled -> hoàn lại kho sản phẩm
+        if (order.PaymentStatus != "Cancelled" && dto.PaymentStatus == "Cancelled")
+        {
+            foreach (var item in order.Items.Where(i => i.ItemType == "Product" && i.ProductId.HasValue))
+            {
+                var product = await _context.Products.FindAsync(item.ProductId!.Value);
+                if (product != null)
+                {
+                    product.StockQuantity += item.Quantity;
+                }
+            }
+        }
+        // Nếu chuyển từ Cancelled sang Completed -> trừ lại kho
+        else if (order.PaymentStatus == "Cancelled" && dto.PaymentStatus == "Completed")
+        {
+            foreach (var item in order.Items.Where(i => i.ItemType == "Product" && i.ProductId.HasValue))
+            {
+                var product = await _context.Products.FindAsync(item.ProductId!.Value);
+                if (product != null)
+                {
+                    product.StockQuantity = Math.Max(0, product.StockQuantity - item.Quantity);
+                }
+            }
+        }
+
+        order.CustomerName = dto.CustomerName;
+        order.CustomerPhone = dto.CustomerPhone;
+        order.PaymentMethod = dto.PaymentMethod;
+        order.PaymentStatus = dto.PaymentStatus;
+        order.Note = dto.Note;
+
+        // Tính lại giảm giá và thực thu nếu có thay đổi % giảm giá
+        double discountPercent = Math.Clamp(dto.DiscountPercent, 0, 100);
+        order.DiscountPercent = discountPercent;
+        order.DiscountAmount = Math.Round(order.SubTotal * (decimal)(discountPercent / 100.0), 0);
+        order.FinalAmount = Math.Max(0, order.SubTotal - order.DiscountAmount);
+
+        await _context.SaveChangesAsync();
+        return Ok(order);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteOrder(int id)
+    {
+        var order = await _context.Orders
+            .Include(o => o.Items)
+            .FirstOrDefaultAsync(o => o.Id == id);
+
+        if (order == null) return NotFound();
+
+        // Nếu đơn hàng chưa bị hủy mà bị xóa thì hoàn lại kho cho các sản phẩm
+        if (order.PaymentStatus != "Cancelled")
+        {
+            foreach (var item in order.Items.Where(i => i.ItemType == "Product" && i.ProductId.HasValue))
+            {
+                var product = await _context.Products.FindAsync(item.ProductId!.Value);
+                if (product != null)
+                {
+                    product.StockQuantity += item.Quantity;
+                }
+            }
+        }
+
+        _context.Orders.Remove(order);
+        await _context.SaveChangesAsync();
+        return NoContent();
     }
 }

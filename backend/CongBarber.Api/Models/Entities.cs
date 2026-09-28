@@ -12,6 +12,14 @@ public class ServiceItem
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 
+public class ServiceCategory
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Color { get; set; } = "#f59e0b"; // Mã màu hex hoặc tên màu đại diện
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}
+
 public class ProductItem
 {
     public int Id { get; set; }
@@ -23,7 +31,16 @@ public class ProductItem
     public int LowStockAlert { get; set; } = 3;
     public string Category { get; set; } = "Sáp vuốt tóc"; // "Sáp vuốt tóc", "Pomade", "Gôm xịt", "Dưỡng tóc"
     public string? Description { get; set; }
+    public bool ShowOnPos { get; set; } = true; // true: Bán tại quầy POS, false: Kho vật tư / dùng nội bộ
     public bool IsActive { get; set; } = true;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}
+
+public class ProductCategory
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Color { get; set; } = "#06b6d4"; // Mã màu hex nhận diện
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 

@@ -17,12 +17,18 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ProductItem>>> GetProducts([FromQuery] bool onlyActive = false)
+    public async Task<ActionResult<IEnumerable<ProductItem>>> GetProducts(
+        [FromQuery] bool onlyActive = false,
+        [FromQuery] bool onlyPos = false)
     {
         var query = _context.Products.AsQueryable();
         if (onlyActive)
         {
             query = query.Where(p => p.IsActive);
+        }
+        if (onlyPos)
+        {
+            query = query.Where(p => p.ShowOnPos);
         }
         return await query.OrderBy(p => p.Category).ThenBy(p => p.Name).ToListAsync();
     }
@@ -80,6 +86,17 @@ public class ProductsController : ControllerBase
         if (product == null) return NotFound();
 
         product.StockQuantity = newStock;
+        await _context.SaveChangesAsync();
+        return Ok(product);
+    }
+
+    [HttpPatch("{id}/toggle-pos")]
+    public async Task<IActionResult> ToggleShowOnPos(int id)
+    {
+        var product = await _context.Products.FindAsync(id);
+        if (product == null) return NotFound();
+
+        product.ShowOnPos = !product.ShowOnPos;
         await _context.SaveChangesAsync();
         return Ok(product);
     }
