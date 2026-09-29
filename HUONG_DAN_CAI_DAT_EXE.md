@@ -18,7 +18,6 @@ D:\Pos\publish\
 ├── DiroPos v2.0.zip               <-- File nén trọn gói gửi cho khách hàng (~53 MB)
 └── DiroPos\                       <-- Thư mục chạy trực tiếp
     ├── DiroPos.exe                <-- File chạy chính của phần mềm (Click đúp)
-    ├── CongBarberPOS.exe          <-- File chạy dự phòng (Tương thích máy cũ)
     ├── Chay_Phan_Mem.bat          <-- File chạy nhanh bằng Batch script
     ├── appsettings.json           <-- Cấu hình hệ thống
     └── wwwroot/                   <-- Toàn bộ giao diện web Vue 3 mới nhất

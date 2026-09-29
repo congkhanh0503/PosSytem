@@ -74,7 +74,9 @@ export const api = {
   // License & Bản quyền
   getLicenseStatus: () => apiClient.get('/license/status'),
   activateLicense: (licenseKey) => apiClient.post('/license/activate', { licenseKey }),
-  syncLicense: () => apiClient.post('/license/sync')
+  syncLicense: () => apiClient.post('/license/sync'),
+  initShop: (data) => apiClient.post('/license/init-shop', data),
+  updateShopProfile: (data) => apiClient.post('/license/update-profile', data)
 }
 
 export default api

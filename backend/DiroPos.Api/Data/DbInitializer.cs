@@ -1,7 +1,7 @@
-using CongBarber.Api.Models;
+﻿using DiroPos.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace CongBarber.Api.Data;
+namespace DiroPos.Api.Data;
 
 public static class DbInitializer
 {
@@ -75,6 +75,43 @@ public static class DbInitializer
             {
                 using var alterCmd = conn.CreateCommand();
                 alterCmd.CommandText = @"ALTER TABLE ""Products"" ADD COLUMN ""ShowOnPos"" INTEGER NOT NULL DEFAULT 1;";
+                alterCmd.ExecuteNonQuery();
+            }
+
+            // Kiểm tra các cột mới trong SystemLicenses để tương thích ngược
+            var sysCols = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            using (var cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = @"PRAGMA table_info(""SystemLicenses"");";
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    sysCols.Add(reader.GetString(1));
+                }
+            }
+
+            if (!sysCols.Contains("IsInitialized"))
+            {
+                using var alterCmd = conn.CreateCommand();
+                alterCmd.CommandText = @"ALTER TABLE ""SystemLicenses"" ADD COLUMN ""IsInitialized"" INTEGER NOT NULL DEFAULT 0;";
+                alterCmd.ExecuteNonQuery();
+            }
+            if (!sysCols.Contains("BusinessModel"))
+            {
+                using var alterCmd = conn.CreateCommand();
+                alterCmd.CommandText = @"ALTER TABLE ""SystemLicenses"" ADD COLUMN ""BusinessModel"" TEXT NULL DEFAULT 'Barber';";
+                alterCmd.ExecuteNonQuery();
+            }
+            if (!sysCols.Contains("OwnerName"))
+            {
+                using var alterCmd = conn.CreateCommand();
+                alterCmd.CommandText = @"ALTER TABLE ""SystemLicenses"" ADD COLUMN ""OwnerName"" TEXT NULL;";
+                alterCmd.ExecuteNonQuery();
+            }
+            if (!sysCols.Contains("Address"))
+            {
+                using var alterCmd = conn.CreateCommand();
+                alterCmd.CommandText = @"ALTER TABLE ""SystemLicenses"" ADD COLUMN ""Address"" TEXT NULL;";
                 alterCmd.ExecuteNonQuery();
             }
 

@@ -1,4 +1,4 @@
-namespace CongBarber.Api.Models;
+﻿namespace DiroPos.Api.Models;
 
 public class ServiceItem
 {
@@ -117,5 +117,9 @@ public class SystemLicense
     public string HardwareId { get; set; } = string.Empty;
     public string? ContactPhone { get; set; }
     public DateTime? LastCheckedAt { get; set; }
+    public bool IsInitialized { get; set; } = false;
+    public string? BusinessModel { get; set; } = "Barber";
+    public string? OwnerName { get; set; }
+    public string? Address { get; set; }
 }
 

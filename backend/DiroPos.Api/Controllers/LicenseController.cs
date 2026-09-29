@@ -1,8 +1,8 @@
-using CongBarber.Api.Dtos;
-using CongBarber.Api.Services;
+﻿using DiroPos.Api.Dtos;
+using DiroPos.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CongBarber.Api.Controllers;
+namespace DiroPos.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -44,6 +44,28 @@ public class LicenseController : ControllerBase
     {
         var (success, message, status) = await _licenseService.SyncWithServerAsync();
         return Ok(new { Success = success, Message = message, Status = status });
+    }
+
+    [HttpPost("init-shop")]
+    public async Task<ActionResult> InitShop([FromBody] InitShopRequestDto request)
+    {
+        var (success, message, status) = await _licenseService.InitializeShopAsync(request);
+        if (!success)
+        {
+            return BadRequest(new { Message = message, Status = status });
+        }
+        return Ok(new { Message = message, Status = status });
+    }
+
+    [HttpPost("update-profile")]
+    public async Task<ActionResult> UpdateProfile([FromBody] UpdateShopProfileDto request)
+    {
+        var (success, message, status) = await _licenseService.UpdateShopProfileAsync(request);
+        if (!success)
+        {
+            return BadRequest(new { Message = message, Status = status });
+        }
+        return Ok(new { Message = message, Status = status });
     }
 
     // Endpoint test: Xóa key bản quyền đưa về trạng thái hết hạn

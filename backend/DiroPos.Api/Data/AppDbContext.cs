@@ -1,7 +1,7 @@
-using Microsoft.EntityFrameworkCore;
-using CongBarber.Api.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using DiroPos.Api.Models;
 
-namespace CongBarber.Api.Data;
+namespace DiroPos.Api.Data;
 
 public class AppDbContext : DbContext
 {

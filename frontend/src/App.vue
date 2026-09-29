@@ -8,6 +8,9 @@
       <RouterView />
     </main>
 
+    <!-- Modal thiết lập thông tin ban đầu khi mới cài đặt -->
+    <InitialSetupModal />
+
     <!-- Hệ thống kiểm soát & khóa bản quyền toàn cục -->
     <LicenseLockModal />
   </div>
@@ -16,4 +19,5 @@
 <script setup>
 import Sidebar from '@/components/Sidebar.vue'
 import LicenseLockModal from '@/components/LicenseLockModal.vue'
+import InitialSetupModal from '@/components/InitialSetupModal.vue'
 </script>

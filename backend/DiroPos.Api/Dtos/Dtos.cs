@@ -1,6 +1,6 @@
-using CongBarber.Api.Models;
+﻿using DiroPos.Api.Models;
 
-namespace CongBarber.Api.Dtos;
+namespace DiroPos.Api.Dtos;
 
 public class OrderItemRequestDto
 {
@@ -155,6 +155,29 @@ public class LicenseStatusDto
     public string HardwareId { get; set; } = string.Empty;
     public string Message { get; set; } = string.Empty;
     public string SupportHotline { get; set; } = "0987.654.321";
+    public bool IsInitialized { get; set; } = false;
+    public string? BusinessModel { get; set; }
+    public string? ContactPhone { get; set; }
+    public string? OwnerName { get; set; }
+    public string? Address { get; set; }
+}
+
+public class InitShopRequestDto
+{
+    public string ShopName { get; set; } = string.Empty;
+    public string Phone { get; set; } = string.Empty;
+    public string BusinessModel { get; set; } = "Barber";
+    public string? OwnerName { get; set; }
+    public string? Address { get; set; }
+}
+
+public class UpdateShopProfileDto
+{
+    public string ShopName { get; set; } = string.Empty;
+    public string Phone { get; set; } = string.Empty;
+    public string? BusinessModel { get; set; }
+    public string? OwnerName { get; set; }
+    public string? Address { get; set; }
 }
 
 public class ActivateLicenseRequestDto

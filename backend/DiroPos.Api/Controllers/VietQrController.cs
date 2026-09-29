@@ -1,9 +1,9 @@
-using CongBarber.Api.Data;
-using CongBarber.Api.Dtos;
-using CongBarber.Api.Services;
+﻿using DiroPos.Api.Data;
+using DiroPos.Api.Dtos;
+using DiroPos.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CongBarber.Api.Controllers;
+namespace DiroPos.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

@@ -1,10 +1,10 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using System.Web;
-using CongBarber.Api.Data;
-using CongBarber.Api.Dtos;
+using DiroPos.Api.Data;
+using DiroPos.Api.Dtos;
 using Microsoft.EntityFrameworkCore;
 
-namespace CongBarber.Api.Services;
+namespace DiroPos.Api.Services;
 
 public interface IVietQrService
 {

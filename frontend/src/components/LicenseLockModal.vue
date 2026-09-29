@@ -2,7 +2,7 @@
   <div>
     <!-- 1. BANNER CẢNH BÁO SẮP HẾT HẠN (Nếu còn <= 5 ngày) -->
     <div
-      v-if="license && license.isValid && license.daysRemaining <= 5"
+      v-if="license && license.isValid && license.daysRemaining <= 5 && !bannerDismissed"
       class="fixed top-0 left-0 right-0 z-40 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white px-4 py-2 text-xs font-semibold shadow-md flex items-center justify-between"
     >
       <div class="flex items-center gap-2 max-w-4xl mx-auto">
@@ -26,6 +26,13 @@
           class="bg-white text-orange-600 hover:bg-orange-50 px-3 py-1 rounded-lg font-bold text-[11px] shadow-xs transition active:scale-95 cursor-pointer shrink-0"
         >
           Nhập Key
+        </button>
+        <button
+          @click="bannerDismissed = true"
+          title="Đóng thông báo này"
+          class="p-1 rounded-md text-amber-100 hover:text-white hover:bg-white/20 transition cursor-pointer"
+        >
+          ✕
         </button>
       </div>
     </div>
@@ -210,6 +217,7 @@ const syncing = ref(false)
 const showManualKeyInput = ref(false)
 const errorMsg = ref('')
 const showActivateDialog = ref(false)
+const bannerDismissed = ref(false)
 
 let autoSyncInterval = null
 
@@ -242,7 +250,6 @@ async function handleSync() {
       license.value = res.data.status
       if (res.data.status.isValid) {
         alert('Chúc mừng! Máy POS đã nhận bản quyền mới và tự động mở khóa!')
-        window.location.reload()
       } else {
         alert(res.data.status.message || 'Bản quyền chưa được gia hạn trên máy chủ Admin.')
       }
@@ -266,7 +273,6 @@ async function handleActivate() {
       license.value = res.data.status
       showActivateDialog.value = false
       inputKey.value = ''
-      window.location.reload()
     }
   } catch (err) {
     errorMsg.value = err.response?.data?.message || err.message || 'Mã bản quyền không hợp lệ.'
@@ -288,7 +294,6 @@ onMounted(() => {
         const res = await api.syncLicense()
         if (res?.data?.status?.isValid) {
           license.value = res.data.status
-          window.location.reload()
         }
       } catch { }
     } else {

@@ -5,12 +5,12 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # Copy file csproj và restore dependencies trước để tận dụng Docker cache
-COPY ["CongBarber.Api.csproj", "./"]
-RUN dotnet restore "CongBarber.Api.csproj"
+COPY ["DiroPos.Api.csproj", "./"]
+RUN dotnet restore "DiroPos.Api.csproj"
 
 # Copy toàn bộ mã nguồn và build release
 COPY . .
-RUN dotnet publish "CongBarber.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "DiroPos.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # ==========================================
 # Stage 2: Runtime Image (Siêu nhẹ)

@@ -1,5 +1,5 @@
-using CongBarber.Api.Data;
-using CongBarber.Api.Services;
+using DiroPos.Api.Data;
+using DiroPos.Api.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -16,7 +16,7 @@ string? envDbPath = Environment.GetEnvironmentVariable("DB_PATH");
 string dbPath = !string.IsNullOrEmpty(envDbPath)
     ? envDbPath
     : (builder.Configuration.GetConnectionString("DefaultConnection")?.Replace("Data Source=", "")
-       ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "congbarber.db"));
+       ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "diropos.db"));
 
 string? dbDir = Path.GetDirectoryName(dbPath);
 if (!string.IsNullOrEmpty(dbDir) && !Directory.Exists(dbDir))
@@ -24,13 +24,19 @@ if (!string.IsNullOrEmpty(dbDir) && !Directory.Exists(dbDir))
     Directory.CreateDirectory(dbDir);
 }
 
-// Tự động di chuyển DB từ thư mục app cũ sang volume data mới nếu cần để tránh mất dữ liệu
+// Tự động chuyển đổi từ congbarber.db cũ sang diropos.db mới để bảo toàn dữ liệu
 if (!File.Exists(dbPath))
 {
-    string oldDbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "congbarber.db");
-    if (File.Exists(oldDbPath))
+    string oldDbInSameDir = Path.Combine(dbDir ?? "", "congbarber.db");
+    string oldDbInBase = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "congbarber.db");
+
+    if (File.Exists(oldDbInSameDir))
     {
-        try { File.Copy(oldDbPath, dbPath, true); } catch { }
+        try { File.Copy(oldDbInSameDir, dbPath, true); } catch { }
+    }
+    else if (File.Exists(oldDbInBase))
+    {
+        try { File.Copy(oldDbInBase, dbPath, true); } catch { }
     }
     else if (File.Exists("congbarber.db"))
     {

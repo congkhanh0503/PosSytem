@@ -4,14 +4,14 @@ services:
   # ==========================================
   backend:
     build:
-      context: ./backend/CongBarber.Api
+      context: ./backend/DiroPos.Api
       dockerfile: Dockerfile
-    container_name: congbarber-backend
+    container_name: diropos-backend
     restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:5012
-      - DB_PATH=/app/data/congbarber.db
+      - DB_PATH=/app/data/diropos.db
       - LICENSE_SERVER_URL=http://host.docker.internal:5020/api/remote-license
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -19,9 +19,9 @@ services:
       - "5012:5012"
     volumes:
       # Sử dụng named volume để tránh lỗi Disk I/O SQLite trên Docker và bảo toàn dữ liệu bán hàng
-      - congbarber-data:/app/data
+      - diropos-data:/app/data
     networks:
-      - congbarber-network
+      - diropos-network
 
   # ==========================================
   # 2. Frontend Service: Vue 3 + Nginx Reverse Proxy
@@ -30,7 +30,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: congbarber-frontend
+    container_name: diropos-frontend
     restart: unless-stopped
     ports:
       - "80:80"       # Cổng HTTP chuẩn
@@ -38,15 +38,15 @@ services:
     depends_on:
       - backend
     networks:
-      - congbarber-network
+      - diropos-network
 
 # ==========================================
 # Cấu hình Network & Persistent Volume
 # ==========================================
 networks:
-  congbarber-network:
+  diropos-network:
     driver: bridge
 
 volumes:
-  congbarber-data:
+  diropos-data:
     driver: local

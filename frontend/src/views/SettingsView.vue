@@ -628,7 +628,18 @@ async function saveSettings() {
   saving.value = true
   try {
     await api.updateSettings(setting.value)
-    showToast('Đã lưu cấu hình DiroPos & VietQR thành công!')
+    // Đồng bộ thông tin tên tiệm, SĐT, địa chỉ lên DiroAdmin Cloud (KHÔNG chạm vào thời hạn bản quyền)
+    try {
+      await api.updateShopProfile({
+        shopName: setting.value.shopName,
+        phone: setting.value.phone,
+        address: setting.value.address,
+        businessModel: licenseInfo.value?.businessModel || 'Barber',
+        ownerName: licenseInfo.value?.ownerName || ''
+      })
+    } catch { }
+    showToast('Đã lưu cấu hình DiroPos & đồng bộ lên hệ thống quản trị thành công!')
+    await loadLicenseInfo()
   } catch (err) {
     alert('Lỗi khi lưu cài đặt: ' + (err.response?.data || err.message))
   } finally {

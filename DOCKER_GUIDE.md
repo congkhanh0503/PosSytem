@@ -1,16 +1,16 @@
-# Hướng Dẫn Triển Khai Docker - CongBarber POS 🚀
+# Hướng Dẫn Triển Khai Docker - DiroPos 🚀
 
-Dự án **CongBarber POS** đã được đóng gói hoàn chỉnh bằng **Docker** & **Docker Compose**, giúp bạn triển khai ứng dụng chỉ với **1 câu lệnh duy nhất** trên bất kỳ máy chủ hoặc máy tính nào (Windows, macOS, Linux).
+Dự án **DiroPos** đã được đóng gói hoàn chỉnh bằng **Docker** & **Docker Compose**, giúp bạn triển khai ứng dụng chỉ với **1 câu lệnh duy nhất** trên bất kỳ máy chủ hoặc máy tính nào (Windows, macOS, Linux).
 
 ---
 
 ## 1. Cấu Trúc Đóng Gói Docker
 
 ```
-CongBaber/
+PosSytem/
 ├── docker-compose.yml              # Quản lý và liên kết các container
 ├── backend/
-│   └── CongBarber.Api/
+│   └── DiroPos.Api/
 │       ├── Dockerfile              # Build .NET 10 Web API & SQLite
 │       └── .dockerignore           # Loại trừ các file rác khi build
 └── frontend/
@@ -25,11 +25,11 @@ CongBaber/
 
 | Dịch vụ | Công nghệ | Cổng Container | Cổng Host | Chức năng |
 | :--- | :--- | :--- | :--- | :--- |
-| **`congbarber-frontend`** | Nginx Alpine + Vue 3 SPA | `80` | **`80`** & **`5173`** | Giao diện bán hàng POS, Dashboard, tự động nén Gzip và chuyển tiếp request `/api/` |
-| **`congbarber-backend`** | .NET 10 Web API + SQLite | `5012` | **`5012`** | Xử lý đơn hàng, chi tiêu, xuất mã VietQR NAPAS 247 và API backup |
+| **`diropos-frontend`** | Nginx Alpine + Vue 3 SPA | `80` | **`80`** & **`5173`** | Giao diện bán hàng POS, Dashboard, tự động nén Gzip và chuyển tiếp request `/api/` |
+| **`diropos-backend`** | .NET 10 Web API + SQLite | `5012` | **`5012`** | Xử lý đơn hàng, chi tiêu, xuất mã VietQR NAPAS 247 và API backup |
 
 > [!TIP]
-> **Bảo toàn dữ liệu bán hàng:** File cơ sở dữ liệu `congbarber.db` được mount trực tiếp từ máy chủ vào container. Khi bạn tắt, restart hoặc cập nhật container mới, toàn bộ dữ liệu đơn hàng và chi tiêu **hoàn toàn không bị mất**.
+> **Bảo toàn dữ liệu bán hàng:** File cơ sở dữ liệu `diropos.db` được mount trực tiếp qua Docker Named Volume `diropos-data`. Khi bạn tắt, restart hoặc cập nhật container mới, toàn bộ dữ liệu đơn hàng và chi tiêu **hoàn toàn không bị mất**.
 
 ---
 
@@ -60,35 +60,14 @@ docker compose logs -f frontend
 
 ### Dừng Hệ Thống
 ```bash
-docker compose stop
-```
-
-### Khởi Động Lại Hệ Thống
-```bash
-docker compose restart
-```
-
-### Tắt Và Gỡ Bỏ Container
-```bash
 docker compose down
 ```
 
 ---
 
-## 4. Đường Dẫn Truy Cập Sau Khi Chạy Docker
+## 4. Địa Chỉ Truy Cập Mặc Định
 
-Sau khi chạy lệnh `docker compose up -d`, bạn mở trình duyệt và truy cập:
-
-- **Giao diện POS Bán Hàng**:
-  - `http://localhost/pos` (Cổng 80 mặc định)
-  - Hoặc: `http://localhost:5173/pos` (Cổng 5173 tiện lợi)
-- **Tổng Quan Báo Cáo Doanh Thu & Lợi Nhuận**:
-  - `http://localhost/`
-- **Quản Lý Đơn Hàng & Lọc Lịch**:
-  - `http://localhost/orders`
-- **Quản Lý Chi Tiêu Tiệm**:
-  - `http://localhost/expenses`
-- **Cài Đặt VietQR & Sao Lưu Database**:
-  - `http://localhost/settings`
-- **Tài Liệu Swagger API**:
-  - `http://localhost:5012/swagger`
+- **Giao diện Bán Hàng & Thu Ngân**: [http://localhost/pos](http://localhost/pos) (hoặc [http://localhost:5173/pos](http://localhost:5173/pos))
+- **Tổng quan Doanh Thu (Dashboard)**: [http://localhost/](http://localhost/)
+- **Cài đặt & Quản lý VietQR**: [http://localhost/settings](http://localhost/settings)
+- **Tài liệu Swagger API**: [http://localhost:5012/swagger](http://localhost:5012/swagger)

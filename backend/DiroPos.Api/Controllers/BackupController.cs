@@ -1,10 +1,10 @@
-using CongBarber.Api.Data;
+using DiroPos.Api.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 
-namespace CongBarber.Api.Controllers;
+namespace DiroPos.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -29,9 +29,13 @@ public class BackupController : ControllerBase
         string? envPath = Environment.GetEnvironmentVariable("DB_PATH");
         if (!string.IsNullOrEmpty(envPath) && System.IO.File.Exists(envPath)) return envPath;
 
-        // 3. Fallback thư mục app
-        string fullPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "congbarber.db");
+        // 3. Fallback thư mục app (ưu tiên diropos.db, sau đó congbarber.db)
+        string fullPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "diropos.db");
         if (System.IO.File.Exists(fullPath)) return fullPath;
+        if (System.IO.File.Exists("diropos.db")) return "diropos.db";
+
+        string oldFullPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "congbarber.db");
+        if (System.IO.File.Exists(oldFullPath)) return oldFullPath;
         if (System.IO.File.Exists("congbarber.db")) return "congbarber.db";
 
         return !string.IsNullOrEmpty(envPath) ? envPath : fullPath;
@@ -64,7 +68,7 @@ public class BackupController : ControllerBase
 
         return Ok(new
         {
-            DatabaseFile = "congbarber.db",
+            DatabaseFile = "diropos.db",
             FileSizeBytes = fileSizeBytes,
             FileSizeFormatted = $"{Math.Round((double)fileSizeBytes / 1024, 1)} KB",
             LastModified = lastModified,
@@ -81,10 +85,10 @@ public class BackupController : ControllerBase
         string dbPath = GetDbPath();
         if (!System.IO.File.Exists(dbPath))
         {
-            return NotFound("Chưa tìm thấy file cơ sở dữ liệu congbarber.db.");
+            return NotFound("Chưa tìm thấy file cơ sở dữ liệu diropos.db.");
         }
 
-        string tempBackupPath = Path.Combine(Path.GetTempPath(), $"congbarber_backup_{DateTime.UtcNow:yyyyMMdd_HHmmss}.db");
+        string tempBackupPath = Path.Combine(Path.GetTempPath(), $"diropos_backup_{DateTime.UtcNow:yyyyMMdd_HHmmss}.db");
 
         try
         {
@@ -102,7 +106,7 @@ public class BackupController : ControllerBase
             SqliteConnection.ClearAllPools();
 
             byte[] bytes = await System.IO.File.ReadAllBytesAsync(tempBackupPath);
-            string downloadFileName = $"congbarber_backup_{DateTime.Now:yyyyMMdd_HHmmss}.db";
+            string downloadFileName = $"diropos_backup_{DateTime.Now:yyyyMMdd_HHmmss}.db";
 
             return File(bytes, "application/octet-stream", downloadFileName);
         }
@@ -141,7 +145,7 @@ public class BackupController : ControllerBase
         }
 
         string dbPath = GetDbPath();
-        string preRestoreBakPath = $"congbarber_{DateTime.UtcNow:yyyyMMdd_HHmmss}.bak";
+        string preRestoreBakPath = $"diropos_{DateTime.UtcNow:yyyyMMdd_HHmmss}.bak";
 
         try
         {
