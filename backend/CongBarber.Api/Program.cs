@@ -101,12 +101,12 @@ app.MapControllers();
 // SPA fallback cho Vue Router
 app.MapFallbackToFile("index.html");
 
-// Tự động mở trình duyệt web khi ứng dụng bắt đầu chạy
+// Tự động mở trình duyệt web & gửi heartbeat ping ngầm lên Cloud khi ứng dụng bắt đầu chạy
 app.Lifetime.ApplicationStarted.Register(() =>
 {
     try
     {
-        // Chờ 500ms để server sẵn sàng
+        // Chờ 500ms để server sẵn sàng rồi mở trình duyệt
         Task.Delay(500).ContinueWith(_ =>
         {
             try
@@ -121,6 +121,24 @@ app.Lifetime.ApplicationStarted.Register(() =>
         });
     }
     catch { }
+
+    // Heartbeat: Tự động gửi ping ngầm lên Cloud Supabase mỗi 60s để DiroAdmin luôn nhận diện Online
+    _ = Task.Run(async () =>
+    {
+        await Task.Delay(1500);
+        while (true)
+        {
+            try
+            {
+                using var scope = app.Services.CreateScope();
+                var licenseSvc = scope.ServiceProvider.GetRequiredService<ILicenseService>();
+                await licenseSvc.SyncWithServerAsync();
+            }
+            catch { }
+
+            await Task.Delay(TimeSpan.FromSeconds(60));
+        }
+    });
 });
 
 app.Run();

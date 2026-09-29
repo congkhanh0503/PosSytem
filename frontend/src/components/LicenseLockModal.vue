@@ -279,6 +279,7 @@ async function handleActivate() {
 onMounted(() => {
   checkLicenseStatus()
   
+  let activeHeartbeatCounter = 0
   // Tự động kiểm tra định kỳ
   autoSyncInterval = setInterval(async () => {
     // Nếu màn hình đang bị khóa, tự động gọi sync mỗi 8 giây để mở khóa tức thì khi Admin vừa bấm gia hạn
@@ -291,6 +292,14 @@ onMounted(() => {
         }
       } catch { }
     } else {
+      activeHeartbeatCounter++
+      // Cứ mỗi 56s (~1 phút) gửi 1 heartbeat ping lên Cloud để DiroAdmin luôn nhận diện Online
+      if (activeHeartbeatCounter >= 7) {
+        activeHeartbeatCounter = 0
+        try {
+          await api.syncLicense()
+        } catch { }
+      }
       checkLicenseStatus()
     }
   }, 8000)

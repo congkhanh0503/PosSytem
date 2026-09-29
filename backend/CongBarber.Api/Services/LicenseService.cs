@@ -316,14 +316,18 @@ public class LicenseService : ILicenseService
         }
         else
         {
-            // Cập nhật last_ping_at và hardware_id nếu trước đó chưa có
+            // Cập nhật last_ping_at và hardware_id lên Supabase
             var patchBody = new Dictionary<string, object?>
             {
                 ["last_ping_at"] = DateTime.UtcNow,
                 ["hardware_id"] = currentHw
             };
             var patchContent = new StringContent(JsonSerializer.Serialize(patchBody), Encoding.UTF8, "application/json");
-            _ = client.PatchAsync($"{supabaseUrl}/rest/v1/customers?id=eq.{record.Id}", patchContent);
+            try
+            {
+                await client.PatchAsync($"{supabaseUrl}/rest/v1/customers?id=eq.{record.Id}", patchContent);
+            }
+            catch { }
         }
 
         if (record != null)
