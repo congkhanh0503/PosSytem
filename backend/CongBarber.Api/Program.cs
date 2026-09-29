@@ -11,9 +11,12 @@ if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_URLS")))
     builder.WebHost.UseUrls("http://0.0.0.0:5012");
 }
 
-// Đường dẫn file SQLite (ưu tiên biến môi trường DB_PATH nếu chạy trong Docker container)
-string dbPath = Environment.GetEnvironmentVariable("DB_PATH") 
-    ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "congbarber.db");
+// Đường dẫn file SQLite (ưu tiên biến môi trường DB_PATH nếu chạy trong Docker container có volume mount)
+string? envDbPath = Environment.GetEnvironmentVariable("DB_PATH");
+string dbPath = !string.IsNullOrEmpty(envDbPath)
+    ? envDbPath
+    : (builder.Configuration.GetConnectionString("DefaultConnection")?.Replace("Data Source=", "")
+       ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "congbarber.db"));
 
 string? dbDir = Path.GetDirectoryName(dbPath);
 if (!string.IsNullOrEmpty(dbDir) && !Directory.Exists(dbDir))
@@ -21,13 +24,28 @@ if (!string.IsNullOrEmpty(dbDir) && !Directory.Exists(dbDir))
     Directory.CreateDirectory(dbDir);
 }
 
+// Tự động di chuyển DB từ thư mục app cũ sang volume data mới nếu cần để tránh mất dữ liệu
+if (!File.Exists(dbPath))
+{
+    string oldDbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "congbarber.db");
+    if (File.Exists(oldDbPath))
+    {
+        try { File.Copy(oldDbPath, dbPath, true); } catch { }
+    }
+    else if (File.Exists("congbarber.db"))
+    {
+        try { File.Copy("congbarber.db", dbPath, true); } catch { }
+    }
+}
+
 // 1. Cấu hình Database SQLite
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") 
-                      ?? $"Data Source={dbPath}"));
+    options.UseSqlite($"Data Source={dbPath}"));
 
 // 2. Đăng ký Services
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<IVietQrService, VietQrService>();
+builder.Services.AddScoped<ILicenseService, LicenseService>();
 
 // 3. Cấu hình Controllers & JSON options
 builder.Services.AddControllers()

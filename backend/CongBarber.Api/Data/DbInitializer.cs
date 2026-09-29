@@ -9,8 +9,9 @@ public static class DbInitializer
     {
         context.Database.EnsureCreated();
 
-        // Đảm bảo cấu trúc các bảng tồn tại trong SQLite
+        // Đảm bảo cấu trúc các bảng tồn tại trong SQLite và bật WAL mode
         context.Database.ExecuteSqlRaw(@"
+            PRAGMA journal_mode=WAL;
             CREATE TABLE IF NOT EXISTS ""Expenses"" (
                 ""Id"" INTEGER NOT NULL CONSTRAINT ""PK_Expenses"" PRIMARY KEY AUTOINCREMENT,
                 ""Title"" TEXT NOT NULL,
@@ -31,6 +32,19 @@ public static class DbInitializer
                 ""Name"" TEXT NOT NULL,
                 ""Color"" TEXT NOT NULL,
                 ""CreatedAt"" TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS ""SystemLicenses"" (
+                ""Id"" INTEGER NOT NULL CONSTRAINT ""PK_SystemLicenses"" PRIMARY KEY AUTOINCREMENT,
+                ""ShopCode"" TEXT NOT NULL,
+                ""ShopName"" TEXT NOT NULL,
+                ""LicenseKey"" TEXT NOT NULL,
+                ""PlanType"" TEXT NOT NULL,
+                ""ActivatedAt"" TEXT NOT NULL,
+                ""ExpiresAt"" TEXT NOT NULL,
+                ""Status"" TEXT NOT NULL,
+                ""HardwareId"" TEXT NOT NULL,
+                ""ContactPhone"" TEXT NULL,
+                ""LastCheckedAt"" TEXT NULL
             );
         ");
 

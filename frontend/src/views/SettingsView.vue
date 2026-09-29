@@ -144,14 +144,16 @@
 
         </form>
 
-        <!-- Card 3: Sao Lưu & Khôi Phục Dữ Liệu (Backup & Restore) -->
+        <!-- Card 3: Đóng Ca Cuối Ngày & Quản Trị Dữ Liệu (Z-Report & Backup) -->
         <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-5">
           <div class="flex items-center justify-between border-b border-slate-100 pb-3">
             <div class="flex items-center gap-2">
-              <Database class="w-5 h-5 text-emerald-600" />
+              <div class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                <Moon class="w-4 h-4 text-indigo-600" />
+              </div>
               <div>
-                <h3 class="font-bold text-slate-900 text-sm">Sao Lưu & Khôi Phục Dữ Liệu (SQLite Database)</h3>
-                <p class="text-[11px] text-slate-500 font-medium">Bảo vệ an toàn cơ sở dữ liệu hóa đơn, chi phí, dịch vụ và sản phẩm</p>
+                <h3 class="font-bold text-slate-900 text-sm">Đóng Ca Cuối Ngày & Quản Trị Dữ Liệu (Z-Report)</h3>
+                <p class="text-[11px] text-slate-500 font-medium">Chốt sổ doanh thu ca làm việc, đối soát két tiền mặt và tự động xuất file sao lưu an toàn</p>
               </div>
             </div>
             <button
@@ -163,7 +165,7 @@
             </button>
           </div>
 
-          <!-- Thống kê Database -->
+          <!-- Thống kê Database & Lần đóng ca -->
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
               <span class="text-[10px] text-slate-500 block mb-0.5">Dung lượng file DB</span>
@@ -178,32 +180,37 @@
               <span class="text-sm font-bold text-rose-600">{{ backupInfo?.totalExpenses ?? 0 }} khoản</span>
             </div>
             <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
-              <span class="text-[10px] text-slate-500 block mb-0.5">Dịch vụ & Sản phẩm</span>
-              <span class="text-sm font-bold text-blue-600">{{ (backupInfo?.totalServices ?? 0) + (backupInfo?.totalProducts ?? 0) }} món</span>
+              <span class="text-[10px] text-slate-500 block mb-0.5">Đóng ca gần nhất</span>
+              <span class="text-xs font-bold text-slate-700 truncate block">{{ lastShiftCloseFormatted }}</span>
             </div>
           </div>
 
-          <!-- Các nút thao tác Sao lưu & Khôi phục -->
+          <!-- Các nút thao tác Đóng ca & Khôi phục -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-            <!-- Nút Tải Sao Lưu -->
-            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between space-y-3">
+            <!-- Nút Đóng Ca & Tải Sao Lưu -->
+            <div class="p-4 rounded-xl bg-gradient-to-br from-slate-900 to-indigo-950 text-white flex flex-col justify-between space-y-3 shadow-md shadow-indigo-950/20">
               <div>
-                <div class="flex items-center gap-2 text-slate-900 font-bold text-xs mb-1">
-                  <Download class="w-4 h-4 text-emerald-600" />
-                  <span>1. Tải Bản Sao Lưu (.db)</span>
+                <div class="flex items-center justify-between text-white font-bold text-xs mb-1">
+                  <div class="flex items-center gap-2">
+                    <Moon class="w-4 h-4 text-amber-400" />
+                    <span>1. Đóng Ca & Chốt Sổ Cuối Ngày</span>
+                  </div>
+                  <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                    KHUYÊN DÙNG
+                  </span>
                 </div>
-                <p class="text-[11px] text-slate-500 leading-relaxed">
-                  Xuất toàn bộ cơ sở dữ liệu hệ thống ra file nhị phân SQLite snapshot. Khuyến nghị tải về lưu trữ định kỳ hàng tuần.
+                <p class="text-[11px] text-slate-300 leading-relaxed">
+                  Tổng hợp tiền mặt trong két, doanh thu VietQR, in phiếu kết ca và tự động tải file sao lưu <code class="text-amber-300 font-mono">.db</code> về máy tính.
                 </p>
               </div>
 
               <button
-                @click="downloadDbBackup"
-                :disabled="downloadingBackup"
-                class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                type="button"
+                @click="isShiftModalOpen = true"
+                class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md shadow-emerald-600/30 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95"
               >
-                <Download class="w-4 h-4" />
-                <span>{{ downloadingBackup ? 'Đang sao lưu...' : 'Tải File Sao Lưu (.db)' }}</span>
+                <Moon class="w-4 h-4" />
+                <span>Mở Giao Diện Đóng Ca & Tải File</span>
               </button>
             </div>
 
@@ -212,10 +219,10 @@
               <div>
                 <div class="flex items-center gap-2 text-slate-900 font-bold text-xs mb-1">
                   <Upload class="w-4 h-4 text-indigo-600" />
-                  <span>2. Khôi Phục Dữ Liệu (Restore)</span>
+                  <span>2. Khôi Phục Dữ Liệu Từ Ca Cũ (Restore)</span>
                 </div>
                 <p class="text-[11px] text-slate-500 leading-relaxed">
-                  Chọn file <code class="text-indigo-600 font-bold">.db</code> đã sao lưu trước đó để nạp lại dữ liệu cũ hoặc chuyển sang máy tính mới.
+                  Chọn file <code class="text-indigo-600 font-bold">.db</code> của ca làm việc hoặc ngày trước đó để nạp lại dữ liệu hoặc chuyển qua máy tính khác.
                 </p>
               </div>
 
@@ -228,6 +235,7 @@
                   class="hidden"
                 />
                 <button
+                  type="button"
                   @click="triggerFileInput"
                   :disabled="restoringBackup"
                   class="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-indigo-600 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer active:scale-95 shadow-2xs"
@@ -243,7 +251,7 @@
           <div class="flex items-start gap-2.5 bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-emerald-800 text-[11px] leading-relaxed">
             <ShieldCheck class="w-4 h-4 shrink-0 mt-0.5 text-emerald-600" />
             <span>
-              <strong>An toàn tuyệt đối:</strong> Hệ thống tự động tạo một bản sao dự phòng <code class="text-emerald-900 font-mono">.bak</code> trước khi tiến hành ghi đè dữ liệu mới, đảm bảo không bao giờ bị mất mát dữ liệu do nhầm lẫn.
+              <strong>Quy trình đóng ca an toàn:</strong> Mỗi lần bấm đóng ca, file sao lưu sẽ được lưu trực tiếp vào máy tính của bạn với mốc thời gian rõ ràng. Dù máy chủ gặp sự cố, bạn luôn sở hữu dữ liệu mới nhất.
             </span>
           </div>
         </div>
@@ -270,6 +278,50 @@
             <p class="text-slate-500">Chủ tài khoản: <span class="text-slate-900 uppercase font-bold">{{ setting.accountName }}</span></p>
             <p class="text-slate-500">Số tiền mẫu: <span class="text-indigo-600 font-bold">100.000 ₫</span></p>
           </div>
+        </div>
+
+        <!-- Card Giấy Phép Bản Quyền DiroPos -->
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3.5">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+            <div class="flex items-center gap-2">
+              <ShieldCheck class="w-4 h-4 text-indigo-600" />
+              <h3 class="font-bold text-slate-900 text-xs">Giấy Phép Bản Quyền DiroPos</h3>
+            </div>
+            <span
+              class="px-2 py-0.5 rounded text-[10px] font-extrabold"
+              :class="licenseInfo?.isValid ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'"
+            >
+              {{ licenseInfo?.status === 'Active' ? 'HOẠT ĐỘNG' : licenseInfo?.status || 'TRIAL' }}
+            </span>
+          </div>
+
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between items-center text-slate-600">
+              <span>Gói cước:</span>
+              <b class="text-slate-900 uppercase">{{ licenseInfo?.planType || 'Dùng Thử' }}</b>
+            </div>
+            <div class="flex justify-between items-center text-slate-600">
+              <span>Hạn sử dụng:</span>
+              <span class="font-bold text-slate-800">{{ formatDate(licenseInfo?.expiresAt) }}</span>
+            </div>
+            <div class="flex justify-between items-center text-slate-600">
+              <span>Thời gian còn lại:</span>
+              <span class="font-black text-indigo-600">{{ licenseInfo?.daysRemaining ?? 0 }} ngày</span>
+            </div>
+            <div class="flex justify-between items-center text-slate-600">
+              <span>Mã thiết bị:</span>
+              <span class="font-mono text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">{{ licenseInfo?.hardwareId }}</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            @click="showLicenseModal = true"
+            class="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 border border-slate-200"
+          >
+            <Key class="w-3.5 h-3.5 text-indigo-600" />
+            <span>Nhập Mã Kích Hoạt / Gia Hạn</span>
+          </button>
         </div>
       </div>
 
@@ -328,6 +380,72 @@
       </div>
     </div>
 
+    <!-- Modal Đóng Ca Cuối Ngày -->
+    <ShiftCloseModal
+      :isOpen="isShiftModalOpen"
+      @close="isShiftModalOpen = false"
+      @completed="onShiftCompleted"
+    />
+
+    <!-- Modal Kích Hoạt / Gia Hạn Bản Quyền -->
+    <div
+      v-if="showLicenseModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 animate-fade-in"
+    >
+      <div class="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2">
+            <Key class="w-5 h-5 text-indigo-600" />
+            <h3 class="font-extrabold text-slate-900 text-sm">Kích Hoạt / Gia Hạn Bản Quyền DiroPos</h3>
+          </div>
+          <button
+            type="button"
+            @click="showLicenseModal = false"
+            class="text-slate-400 hover:text-slate-600 p-1 rounded-lg"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="space-y-3 text-xs">
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1 text-slate-600">
+            <p>Mã quán: <b class="text-indigo-600 font-mono">{{ licenseInfo?.shopCode }}</b></p>
+            <p>Mã thiết bị: <span class="font-mono text-slate-800">{{ licenseInfo?.hardwareId }}</span></p>
+            <p>Hotline hỗ trợ: <b class="text-emerald-600">{{ licenseInfo?.supportHotline || '0987.654.321' }}</b></p>
+          </div>
+
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">Dán mã kích hoạt (License Key) do Admin cấp:</label>
+            <textarea
+              v-model="licenseInputKey"
+              rows="3"
+              placeholder="VD: eyJzaG9wQ29kZSI6..."
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-mono text-slate-900 focus:outline-none focus:border-indigo-500 focus:bg-white resize-none"
+            ></textarea>
+          </div>
+
+          <div class="flex items-center justify-end gap-2 pt-2">
+            <button
+              type="button"
+              @click="showLicenseModal = false"
+              class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs"
+            >
+              Hủy
+            </button>
+            <button
+              type="button"
+              @click="handleActivateLicense"
+              :disabled="activatingLicense || !licenseInputKey.trim()"
+              class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/20 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            >
+              <Key class="w-3.5 h-3.5" />
+              <span>{{ activatingLicense ? 'Đang kích hoạt...' : 'Xác Nhận Kích Hoạt' }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Toast message -->
     <div 
       v-if="toast" 
@@ -343,6 +461,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import api from '@/services/api'
+import ShiftCloseModal from '@/components/ShiftCloseModal.vue'
 import {
   QrCode,
   Store,
@@ -353,7 +472,9 @@ import {
   RefreshCw,
   AlertTriangle,
   CheckCircle2,
-  ShieldCheck
+  ShieldCheck,
+  Moon,
+  Key
 } from 'lucide-vue-next'
 
 const setting = ref({
@@ -372,7 +493,54 @@ const banks = ref([])
 const toast = ref('')
 const saving = ref(false)
 
-// Backup & Restore State
+// License State
+const licenseInfo = ref(null)
+const showLicenseModal = ref(false)
+const licenseInputKey = ref('')
+const activatingLicense = ref(false)
+
+function formatDate(isoStr) {
+  if (!isoStr) return '---'
+  try {
+    const d = new Date(isoStr)
+    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`
+  } catch {
+    return isoStr
+  }
+}
+
+async function loadLicenseInfo() {
+  try {
+    const res = await api.getLicenseStatus()
+    if (res?.data) {
+      licenseInfo.value = res.data
+    }
+  } catch (err) {
+    console.error('Lỗi khi tải thông tin bản quyền:', err)
+  }
+}
+
+async function handleActivateLicense() {
+  if (!licenseInputKey.value.trim()) return
+  activatingLicense.value = true
+  try {
+    const res = await api.activateLicense(licenseInputKey.value.trim())
+    if (res?.data) {
+      showToast(res.data.message || 'Kích hoạt bản quyền thành công!')
+      showLicenseModal.value = false
+      licenseInputKey.value = ''
+      await loadLicenseInfo()
+    }
+  } catch (err) {
+    alert(err.response?.data?.message || err.message || 'Mã bản quyền không hợp lệ.')
+  } finally {
+    activatingLicense.value = false
+  }
+}
+
+// Đóng Ca & Backup State
+const isShiftModalOpen = ref(false)
+const lastShiftClose = ref(localStorage.getItem('diropos_last_shift_close'))
 const backupInfo = ref(null)
 const loadingBackupInfo = ref(false)
 const downloadingBackup = ref(false)
@@ -380,6 +548,26 @@ const restoringBackup = ref(false)
 const showRestoreModal = ref(false)
 const selectedFile = ref(null)
 const fileInputRef = ref(null)
+
+const lastShiftCloseFormatted = computed(() => {
+  if (!lastShiftClose.value) return 'Chưa đóng ca'
+  try {
+    const d = new Date(lastShiftClose.value)
+    const day = String(d.getDate()).padStart(2, '0')
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const hours = String(d.getHours()).padStart(2, '0')
+    const mins = String(d.getMinutes()).padStart(2, '0')
+    return `${hours}:${mins} - ${day}/${month}`
+  } catch {
+    return 'Chưa đóng ca'
+  }
+})
+
+function onShiftCompleted(event) {
+  lastShiftClose.value = event.time
+  showToast(`Đã đóng ca thành công! Đã lưu file: ${event.fileName}`)
+  loadBackupInfo()
+}
 
 function showToast(msg) {
   toast.value = msg
@@ -396,6 +584,7 @@ async function loadData() {
     ])
     if (setRes.data) setting.value = setRes.data
     if (bankRes.data) banks.value = bankRes.data
+    await loadLicenseInfo()
   } catch (err) {
     console.error('Lỗi khi tải cài đặt:', err)
   }

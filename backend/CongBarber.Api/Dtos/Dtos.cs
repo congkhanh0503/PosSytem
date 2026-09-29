@@ -34,6 +34,8 @@ public class UpdateOrderDto
 public class VietQrResponseDto
 {
     public string QrImageUrl { get; set; } = string.Empty;
+    public string QrData { get; set; } = string.Empty; // Chuỗi payload chuẩn EMVCo NAPAS 247
+    public string BankBin { get; set; } = string.Empty;
     public string BankId { get; set; } = string.Empty;
     public string BankName { get; set; } = string.Empty;
     public string AccountNo { get; set; } = string.Empty;
@@ -138,4 +140,34 @@ public class DayDetailDto
     public decimal CashTotal { get; set; }
     public List<Order> Orders { get; set; } = new();
     public List<Expense> Expenses { get; set; } = new();
+}
+
+public class LicenseStatusDto
+{
+    public bool IsValid { get; set; }
+    public string ShopCode { get; set; } = string.Empty;
+    public string ShopName { get; set; } = string.Empty;
+    public string PlanType { get; set; } = string.Empty;
+    public string Status { get; set; } = "Active"; // Active, Expired, Suspended, Invalid
+    public DateTime ActivatedAt { get; set; }
+    public DateTime ExpiresAt { get; set; }
+    public int DaysRemaining { get; set; }
+    public string HardwareId { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
+    public string SupportHotline { get; set; } = "0987.654.321";
+}
+
+public class ActivateLicenseRequestDto
+{
+    public string LicenseKey { get; set; } = string.Empty;
+}
+
+public class LicensePayload
+{
+    public string ShopCode { get; set; } = string.Empty;
+    public string ShopName { get; set; } = string.Empty;
+    public string PlanType { get; set; } = "Yearly";
+    public DateTime ExpiresAt { get; set; }
+    public string HardwareId { get; set; } = string.Empty;
+    public long IssuedTimestamp { get; set; }
 }

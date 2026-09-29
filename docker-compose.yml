@@ -12,6 +12,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:5012
       - DB_PATH=/app/data/congbarber.db
+      - LICENSE_SERVER_URL=http://host.docker.internal:5020/api/remote-license
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "5012:5012"
     volumes:

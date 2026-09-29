@@ -7,9 +7,13 @@
     <main class="flex-1 h-screen overflow-hidden bg-slate-50 relative">
       <RouterView />
     </main>
+
+    <!-- Hệ thống kiểm soát & khóa bản quyền toàn cục -->
+    <LicenseLockModal />
   </div>
 </template>
 
 <script setup>
 import Sidebar from '@/components/Sidebar.vue'
+import LicenseLockModal from '@/components/LicenseLockModal.vue'
 </script>

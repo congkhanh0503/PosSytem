@@ -13,11 +13,13 @@ public class OrdersController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly IVietQrService _vietQrService;
+    private readonly ILicenseService _licenseService;
 
-    public OrdersController(AppDbContext context, IVietQrService vietQrService)
+    public OrdersController(AppDbContext context, IVietQrService vietQrService, ILicenseService licenseService)
     {
         _context = context;
         _vietQrService = vietQrService;
+        _licenseService = licenseService;
     }
 
     [HttpGet]
@@ -83,6 +85,13 @@ public class OrdersController : ControllerBase
     [HttpPost]
     public async Task<ActionResult> CreateOrder([FromBody] CreateOrderDto dto)
     {
+        // 0. Kiểm tra bản quyền sử dụng phần mềm
+        if (!await _licenseService.IsLicenseValidAsync())
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, 
+                "Bản quyền phần mềm DiroPos đã hết hạn hoặc bị tạm khóa. Vui lòng liên hệ Admin để gia hạn tiếp tục bán hàng.");
+        }
+
         if (dto.Items == null || dto.Items.Count == 0)
         {
             return BadRequest("Đơn hàng phải có ít nhất 1 dịch vụ hoặc sản phẩm.");

@@ -15,13 +15,26 @@ public class BackupController : ControllerBase
 
     private string GetDbPath()
     {
-        string? envPath = Environment.GetEnvironmentVariable("DB_PATH");
-        if (!string.IsNullOrEmpty(envPath)) return envPath;
+        // 1. Lấy trực tiếp từ DataSource của kết nối đang hoạt động
+        try
+        {
+            var conn = _context.Database.GetDbConnection();
+            string ds = conn.DataSource;
+            if (!string.IsNullOrEmpty(ds) && System.IO.File.Exists(ds)) return ds;
+            if (!string.IsNullOrEmpty(ds) && System.IO.File.Exists(Path.GetFullPath(ds))) return Path.GetFullPath(ds);
+        }
+        catch { }
 
+        // 2. Lấy từ biến môi trường DB_PATH
+        string? envPath = Environment.GetEnvironmentVariable("DB_PATH");
+        if (!string.IsNullOrEmpty(envPath) && System.IO.File.Exists(envPath)) return envPath;
+
+        // 3. Fallback thư mục app
         string fullPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "congbarber.db");
         if (System.IO.File.Exists(fullPath)) return fullPath;
         if (System.IO.File.Exists("congbarber.db")) return "congbarber.db";
-        return fullPath;
+
+        return !string.IsNullOrEmpty(envPath) ? envPath : fullPath;
     }
 
     public BackupController(AppDbContext context, IWebHostEnvironment env)

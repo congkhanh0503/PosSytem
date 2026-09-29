@@ -29,4 +29,4 @@ COPY --from=build /app/publish .
 EXPOSE 5012
 
 # Khởi chạy API
-ENTRYPOINT ["dotnet", "CongBarber.Api.dll"]
+ENTRYPOINT ["dotnet", "DiroPos.dll"]

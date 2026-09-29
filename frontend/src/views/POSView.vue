@@ -510,21 +510,17 @@ async function loadData() {
 }
 
 async function handleCheckout(method) {
-  if (pos.cart.length === 0) return
+  if (pos.cart.length === 0 || pos.isLoading) return
 
-  if (method === 'Cash') {
-    try {
+  try {
+    pos.isLoading = true
+    if (method === 'Cash') {
       const res = await pos.checkout('Cash')
       const order = res.order || res
       pos.clearCart()
       showToast(`Tạo đơn ${order.orderCode} tiền mặt thành công!`)
       await loadData()
-    } catch (err) {
-      alert('Lỗi tạo đơn: ' + err.message)
-    }
-  } else if (method === 'VietQR') {
-    try {
-      pos.isLoading = true
+    } else if (method === 'VietQR') {
       const res = await pos.checkout('VietQR')
       const order = res.order || res
       currentCreatedOrder.value = order
@@ -538,11 +534,11 @@ async function handleCheckout(method) {
 
       isQrModalOpen.value = true
       pos.clearCart()
-    } catch (err) {
-      alert('Lỗi tạo mã VietQR: ' + err.message)
-    } finally {
-      pos.isLoading = false
     }
+  } catch (err) {
+    alert(`Lỗi tạo đơn (${method}): ` + err.message)
+  } finally {
+    pos.isLoading = false
   }
 }
 

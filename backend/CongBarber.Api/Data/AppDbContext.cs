@@ -17,6 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<Expense> Expenses => Set<Expense>();
     public DbSet<ServiceCategory> ServiceCategories => Set<ServiceCategory>();
     public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
+    public DbSet<SystemLicense> SystemLicenses => Set<SystemLicense>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

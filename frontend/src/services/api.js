@@ -69,7 +69,12 @@ export const api = {
   downloadBackup: () => apiClient.get('/backup/download', { responseType: 'blob' }),
   restoreBackup: (formData) => apiClient.post('/backup/restore', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
-  })
+  }),
+
+  // License & Bản quyền
+  getLicenseStatus: () => apiClient.get('/license/status'),
+  activateLicense: (licenseKey) => apiClient.post('/license/activate', { licenseKey }),
+  syncLicense: () => apiClient.post('/license/sync')
 }
 
 export default api

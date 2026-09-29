@@ -80,6 +80,6 @@ const navItems = [
   { path: '/services', label: 'Quản Lý Dịch Vụ', icon: Sparkles },
   { path: '/products', label: 'Sản Phẩm & Kho', icon: Package },
   { path: '/orders', label: 'Lịch Sử Đơn Hàng', icon: ReceiptText },
-  { path: '/settings', label: 'Cài Đặt VietQR', icon: Settings }
+  { path: '/settings', label: 'Cài Đặt & Đóng Ca', icon: Settings }
 ]
 </script>

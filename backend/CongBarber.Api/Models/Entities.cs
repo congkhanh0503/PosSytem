@@ -104,3 +104,18 @@ public class Expense
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 
+public class SystemLicense
+{
+    public int Id { get; set; } = 1;
+    public string ShopCode { get; set; } = "DIRO-POS-01";
+    public string ShopName { get; set; } = "DiroPos Store";
+    public string LicenseKey { get; set; } = string.Empty;
+    public string PlanType { get; set; } = "Trial"; // Trial, Monthly, Yearly, Lifetime
+    public DateTime ActivatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime ExpiresAt { get; set; } = DateTime.UtcNow.AddDays(30);
+    public string Status { get; set; } = "Active"; // Active, Expired, Suspended
+    public string HardwareId { get; set; } = string.Empty;
+    public string? ContactPhone { get; set; }
+    public DateTime? LastCheckedAt { get; set; }
+}
+

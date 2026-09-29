@@ -83,10 +83,10 @@ public class ExpensesController : ControllerBase
 
         if (expense.Date == default)
         {
-            expense.Date = DateTime.UtcNow;
+            expense.Date = DateTime.UtcNow.AddHours(7);
         }
 
-        expense.CreatedAt = DateTime.UtcNow;
+        expense.CreatedAt = DateTime.UtcNow.AddHours(7);
         _context.Expenses.Add(expense);
         await _context.SaveChangesAsync();
 

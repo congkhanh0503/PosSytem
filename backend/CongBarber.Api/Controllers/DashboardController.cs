@@ -277,7 +277,7 @@ public class DashboardController : ControllerBase
     [HttpGet("day-detail")]
     public async Task<ActionResult<DayDetailDto>> GetDayDetail([FromQuery] string? date = null)
     {
-        var now = DateTime.UtcNow;
+        var now = DateTime.UtcNow.AddHours(7);
         DateTime parsedDate = now.Date;
 
         if (!string.IsNullOrWhiteSpace(date) && DateTime.TryParse(date, out DateTime dt))
