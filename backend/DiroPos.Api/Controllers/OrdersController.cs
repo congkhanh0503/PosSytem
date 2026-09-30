@@ -1,4 +1,4 @@
-﻿using DiroPos.Api.Data;
+using DiroPos.Api.Data;
 using DiroPos.Api.Dtos;
 using DiroPos.Api.Models;
 using DiroPos.Api.Services;
@@ -172,18 +172,24 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost("{id}/cancel")]
-    public async Task<IActionResult> CancelOrder(int id)
+    public async Task<IActionResult> CancelOrder(int id, [FromBody] CancelOrderRequestDto? dto = null)
     {
         var order = await _context.Orders
             .Include(o => o.Items)
             .FirstOrDefaultAsync(o => o.Id == id);
 
-        if (order == null) return NotFound();
-        if (order.PaymentStatus == "Cancelled") return BadRequest("Đơn hàng này đã bị hủy trước đó.");
+        if (order == null) return NotFound(new { message = "Không tìm thấy đơn hàng." });
+        if (order.PaymentStatus == "Cancelled") return BadRequest(new { message = "Đơn hàng này đã ở trạng thái HỦY trước đó." });
 
         order.PaymentStatus = "Cancelled";
 
-        // Hoàn lại kho sản phẩm
+        string cancelReason = !string.IsNullOrWhiteSpace(dto?.Reason) ? dto.Reason.Trim() : "Khách yêu cầu / nhân viên hủy";
+        string timestamp = DateTime.UtcNow.AddHours(7).ToString("HH:mm dd/MM/yyyy");
+        order.Note = string.IsNullOrWhiteSpace(order.Note)
+            ? $"[ĐÃ HỦY ĐƠN ({timestamp}) - Lý do: {cancelReason}]"
+            : $"{order.Note} | [ĐÃ HỦY ({timestamp}) - {cancelReason}]";
+
+        // Hoàn lại kho sản phẩm nếu đơn có bán sản phẩm
         foreach (var item in order.Items.Where(i => i.ItemType == "Product" && i.ProductId.HasValue))
         {
             var product = await _context.Products.FindAsync(item.ProductId!.Value);
@@ -194,7 +200,7 @@ public class OrdersController : ControllerBase
         }
 
         await _context.SaveChangesAsync();
-        return Ok(order);
+        return Ok(new { message = "Hủy đơn hàng thành công!", order });
     }
 
     [HttpPut("{id}")]
@@ -248,29 +254,11 @@ public class OrdersController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteOrder(int id)
+    public IActionResult DeleteOrder(int id)
     {
-        var order = await _context.Orders
-            .Include(o => o.Items)
-            .FirstOrDefaultAsync(o => o.Id == id);
-
-        if (order == null) return NotFound();
-
-        // Nếu đơn hàng chưa bị hủy mà bị xóa thì hoàn lại kho cho các sản phẩm
-        if (order.PaymentStatus != "Cancelled")
-        {
-            foreach (var item in order.Items.Where(i => i.ItemType == "Product" && i.ProductId.HasValue))
-            {
-                var product = await _context.Products.FindAsync(item.ProductId!.Value);
-                if (product != null)
-                {
-                    product.StockQuantity += item.Quantity;
-                }
-            }
-        }
-
-        _context.Orders.Remove(order);
-        await _context.SaveChangesAsync();
-        return NoContent();
+        // Chống gian lận tài chính & thất thoát doanh thu: Tuyệt đối không cho phép xóa vật lý đơn hàng khỏi cơ sở dữ liệu
+        return BadRequest(new { 
+            message = "Hệ thống bảo vệ tài chính DiroPos không cho phép xóa vĩnh viễn đơn hàng để tránh thất thoát và gian lận. Vui lòng sử dụng tính năng 'HỦY ĐƠN HÀNG'." 
+        });
     }
 }

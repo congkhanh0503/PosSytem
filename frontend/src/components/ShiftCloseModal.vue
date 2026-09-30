@@ -147,17 +147,26 @@
             </div>
           </div>
 
-          <!-- Thông Báo Đóng Ca Thành Công (nếu đã tải) -->
+          <!-- Thông Báo Đóng Ca Thành Công -->
           <div
             v-if="backupCompleted"
-            class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 space-y-2 animate-fade-in"
+            class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 space-y-2.5 animate-fade-in"
           >
             <div class="flex items-center gap-2 font-bold text-xs text-emerald-900">
               <CheckCircle2 class="w-4 h-4 text-emerald-600" />
-              <span>Đóng ca thành công! File dữ liệu (.db) đã được lưu vào máy tính</span>
+              <span>Đóng ca thành công! Dữ liệu đã được bảo toàn an toàn</span>
             </div>
+
+            <!-- Tình trạng Cloud Backup tự động -->
+            <div class="flex items-center gap-2 text-xs p-2.5 rounded-lg border" :class="cloudUploadSuccess ? 'bg-indigo-50 border-indigo-200 text-indigo-800 font-medium' : (cloudUploading ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-slate-100 border-slate-200 text-slate-600')">
+              <Cloud class="w-4 h-4 shrink-0" :class="cloudUploading ? 'text-indigo-600 animate-pulse' : (cloudUploadSuccess ? 'text-indigo-600' : 'text-amber-600')" />
+              <span>
+                {{ cloudUploading ? 'Đang tự động nén và đồng bộ lên Cloud Supabase...' : (cloudUploadSuccess ? (cloudUploadMessage || '☁️ Đã tự động đồng bộ lên Cloud an toàn (Lưu trữ 3 bản mới nhất)!') : (cloudUploadMessage || 'Đã lưu trữ an toàn trên máy cục bộ.')) }}
+              </span>
+            </div>
+
             <p class="text-[11px] leading-relaxed text-emerald-700">
-              Hệ thống đã tự động xuất snapshot dữ liệu an toàn. Bạn có thể in phiếu kết ca bên dưới để lưu vào sổ thu chi hoặc bàn giao cho chủ quán.
+              Hệ thống đã lưu lại toàn bộ số liệu kết ca. Bạn có thể in phiếu kết ca bên dưới để lưu vào sổ thu chi hoặc bàn giao cho chủ quán.
             </p>
           </div>
 
@@ -184,15 +193,15 @@
             Bỏ qua
           </button>
 
-          <!-- Nút Xác Nhận Đóng Ca & Tải File Sao Lưu -->
+          <!-- Nút Xác Nhận Đóng Ca -->
           <button
             @click="executeShiftCloseAndBackup"
-            :disabled="loading || downloading"
+            :disabled="loading || closingShift"
             class="py-2.5 px-5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs shadow-md shadow-emerald-600/25 transition flex items-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50"
           >
-            <Download v-if="!downloading" class="w-4 h-4" />
+            <Cloud v-if="!closingShift" class="w-4 h-4" />
             <RefreshCw v-else class="w-4 h-4 animate-spin" />
-            <span>{{ downloading ? 'Đang xuất dữ liệu...' : 'Xác Nhận Đóng Ca & Tải File (.db)' }}</span>
+            <span>{{ closingShift ? 'Đang đóng ca & đồng bộ...' : 'Xác Nhận Đóng Ca' }}</span>
           </button>
         </div>
       </div>
@@ -271,6 +280,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import api from '@/services/api'
+import { useNotify } from '@/composables/useNotify'
 import {
   Moon,
   X,
@@ -279,8 +289,11 @@ import {
   FileText,
   CheckCircle2,
   Printer,
-  Download
+  Download,
+  Cloud
 } from 'lucide-vue-next'
+
+const { toast } = useNotify()
 
 const props = defineProps({
   isOpen: {
@@ -292,8 +305,11 @@ const props = defineProps({
 const emit = defineEmits(['close', 'completed'])
 
 const loading = ref(false)
-const downloading = ref(false)
+const closingShift = ref(false)
 const backupCompleted = ref(false)
+const cloudUploading = ref(false)
+const cloudUploadSuccess = ref(false)
+const cloudUploadMessage = ref('')
 
 const shiftStaff = ref(localStorage.getItem('diropos_staff_name') || 'Thu ngân')
 const shiftNote = ref('')
@@ -361,47 +377,46 @@ watch(
 )
 
 async function executeShiftCloseAndBackup() {
-  downloading.value = true
+  closingShift.value = true
+  cloudUploading.value = true
+  cloudUploadSuccess.value = false
+  cloudUploadMessage.value = ''
+
   try {
-    // 1. Tải bản sao lưu SQLite database
-    const response = await api.downloadBackup()
-    const blob = new Blob([response.data], { type: 'application/octet-stream' })
-    const downloadUrl = window.URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    
-    // Tên file rõ ràng: DiroPos_DongCa_2026-09-29_14h30.db
     const now = new Date()
-    const yyyy = now.getFullYear()
-    const mm = String(now.getMonth() + 1).padStart(2, '0')
-    const dd = String(now.getDate()).padStart(2, '0')
-    const hh = String(now.getHours()).padStart(2, '0')
-    const min = String(now.getMinutes()).padStart(2, '0')
-    const fileName = `DiroPos_DongCa_${yyyy}-${mm}-${dd}_${hh}h${min}.db`
 
-    link.href = downloadUrl
-    link.setAttribute('download', fileName)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    window.URL.revokeObjectURL(downloadUrl)
-
-    // 2. Lưu trạng thái
-    backupCompleted.value = true
+    // 1. Lưu thông tin ca vào máy tính
     if (shiftStaff.value) {
       localStorage.setItem('diropos_staff_name', shiftStaff.value)
     }
     localStorage.setItem('diropos_last_shift_close', now.toISOString())
 
+    // 2. Tự động nén và đồng bộ sao lưu lên Cloud Supabase (lưu tối đa 3 bản mới nhất)
+    try {
+      const res = await api.uploadCloudBackup()
+      if (res.data?.success) {
+        cloudUploadSuccess.value = true
+        cloudUploadMessage.value = res.data.message || '☁️ Đã tự động đồng bộ lên Cloud an toàn (Lưu trữ 3 bản mới nhất)!'
+      }
+    } catch (uploadErr) {
+      console.warn('Lỗi đồng bộ Cloud backup tự động:', uploadErr)
+      cloudUploadSuccess.value = false
+      cloudUploadMessage.value = 'Mất kết nối mạng - Dữ liệu đã lưu trữ an toàn trên máy cục bộ.'
+    } finally {
+      cloudUploading.value = false
+    }
+
+    backupCompleted.value = true
+
     emit('completed', {
-      fileName,
       time: now.toISOString(),
       summary: summary.value
     })
   } catch (err) {
-    console.error('Lỗi khi đóng ca & tải sao lưu:', err)
-    alert('Không thể xuất file sao lưu: ' + (err.response?.data || err.message))
+    console.error('Lỗi khi đóng ca:', err)
+    toast.error('Lỗi khi đóng ca: ' + (err.response?.data?.message || err.message))
   } finally {
-    downloading.value = false
+    closingShift.value = false
   }
 }
 

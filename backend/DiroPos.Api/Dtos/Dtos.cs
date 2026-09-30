@@ -1,4 +1,4 @@
-﻿using DiroPos.Api.Models;
+using DiroPos.Api.Models;
 
 namespace DiroPos.Api.Dtos;
 
@@ -29,6 +29,11 @@ public class UpdateOrderDto
     public string PaymentMethod { get; set; } = "VietQR";
     public string PaymentStatus { get; set; } = "Completed"; // "Completed" | "Cancelled"
     public string? Note { get; set; }
+}
+
+public class CancelOrderRequestDto
+{
+    public string? Reason { get; set; }
 }
 
 public class VietQrResponseDto

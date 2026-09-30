@@ -58,20 +58,46 @@
           <p class="text-[11px] text-emerald-600 font-medium">Hệ thống sẵn sàng</p>
         </div>
       </div>
+
+      <!-- App Version Info -->
+      <div class="mt-2.5 px-3 py-1.5 rounded-lg bg-slate-100/80 flex items-center justify-between text-[11px] text-slate-500 font-medium">
+        <span class="flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          DiroPos
+        </span>
+        <span class="font-bold text-slate-700 bg-white px-1.5 py-0.5 rounded border border-slate-200 text-[10px] tracking-tight">
+          v{{ appVersion }}
+        </span>
+      </div>
     </div>
   </aside>
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
+import api from '@/services/api'
 import { 
   Store, 
   LayoutDashboard, 
   Package, 
   ReceiptText, 
-  Settings,
-  Sparkles,
-  WalletCards
+  Settings, 
+  Sparkles, 
+  WalletCards 
 } from 'lucide-vue-next'
+
+const appVersion = ref('1.0.0')
+
+onMounted(async () => {
+  try {
+    const res = await api.getSystemVersion()
+    if (res?.data?.version) {
+      appVersion.value = res.data.version
+    }
+  } catch {
+    // fallback default
+  }
+})
 
 const navItems = [
   { path: '/', label: 'Bán Hàng POS', icon: Store },

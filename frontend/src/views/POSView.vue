@@ -380,14 +380,6 @@
       @complete="onQrPaymentComplete"
     />
 
-    <!-- Quick Toast / Notification -->
-    <div 
-      v-if="toast" 
-      class="fixed bottom-6 right-6 z-50 bg-emerald-600 text-white font-bold text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 animate-bounce"
-    >
-      <span>✓ {{ toast }}</span>
-    </div>
-
   </div>
 </template>
 
@@ -395,6 +387,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { usePosStore } from '@/stores/posStore'
 import api from '@/services/api'
+import { useNotify } from '@/composables/useNotify'
 import VietQrModal from '@/components/VietQrModal.vue'
 import { 
   Sparkles,
@@ -408,6 +401,8 @@ import {
   Store 
 } from 'lucide-vue-next'
 
+const { toast: notify } = useNotify()
+
 const pos = usePosStore()
 
 const services = ref([])
@@ -419,7 +414,6 @@ const searchQuery = ref('')
 const isQrModalOpen = ref(false)
 const currentVietQr = ref(null)
 const currentCreatedOrder = ref(null)
-const toast = ref('')
 
 const serviceCategories = ref([])
 const productCategories = ref([])
@@ -486,10 +480,7 @@ function formatCurrency(val) {
 }
 
 function showToast(msg) {
-  toast.value = msg
-  setTimeout(() => {
-    toast.value = ''
-  }, 2500)
+  notify.success(msg)
 }
 
 async function loadData() {
@@ -536,7 +527,7 @@ async function handleCheckout(method) {
       pos.clearCart()
     }
   } catch (err) {
-    alert(`Lỗi tạo đơn (${method}): ` + err.message)
+    notify.error(`Lỗi tạo đơn (${method}): ` + err.message)
   } finally {
     pos.isLoading = false
   }

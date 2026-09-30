@@ -13,6 +13,13 @@
 
     <!-- Hệ thống kiểm soát & khóa bản quyền toàn cục -->
     <LicenseLockModal />
+
+    <!-- Hệ thống thông báo & Xác nhận toàn cục -->
+    <ToastProvider />
+    <ConfirmModal />
+
+    <!-- Hệ thống thông báo cập nhật phiên bản mới -->
+    <UpdateNotificationModal />
   </div>
 </template>
 
@@ -20,4 +27,7 @@
 import Sidebar from '@/components/Sidebar.vue'
 import LicenseLockModal from '@/components/LicenseLockModal.vue'
 import InitialSetupModal from '@/components/InitialSetupModal.vue'
+import ToastProvider from '@/components/ToastProvider.vue'
+import ConfirmModal from '@/components/ConfirmModal.vue'
+import UpdateNotificationModal from '@/components/UpdateNotificationModal.vue'
 </script>

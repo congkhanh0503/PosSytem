@@ -144,115 +144,195 @@
 
         </form>
 
-        <!-- Card 3: Đóng Ca Cuối Ngày & Quản Trị Dữ Liệu (Z-Report & Backup) -->
-        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-5">
+        <!-- Card 3: Đóng Ca Cuối Ngày & Dữ Liệu Đám Mây (Z-Report & Cloud Backup) -->
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
+          <!-- Header Card 3 -->
           <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div class="flex items-center gap-2">
-              <div class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
-                <Moon class="w-4 h-4 text-indigo-600" />
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-100/80 flex items-center justify-center text-indigo-600">
+                <Moon class="w-4 h-4" />
               </div>
               <div>
-                <h3 class="font-bold text-slate-900 text-sm">Đóng Ca Cuối Ngày & Quản Trị Dữ Liệu (Z-Report)</h3>
-                <p class="text-[11px] text-slate-500 font-medium">Chốt sổ doanh thu ca làm việc, đối soát két tiền mặt và tự động xuất file sao lưu an toàn</p>
+                <h3 class="font-bold text-slate-900 text-sm">Đóng Ca Cuối Ngày & Dữ Liệu Đám Mây</h3>
+                <p class="text-[11px] text-slate-500 font-medium">Chốt ca làm việc, đối soát két tiền và tự động bảo vệ dữ liệu trên Cloud</p>
               </div>
             </div>
+
             <button
-              @click="loadBackupInfo"
-              title="Làm mới trạng thái DB"
-              class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition"
+              type="button"
+              @click="loadBackupInfo(); loadCloudBackups();"
+              title="Làm mới trạng thái dữ liệu"
+              class="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition cursor-pointer"
             >
-              <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': loadingBackupInfo }" />
+              <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': loadingBackupInfo || loadingCloudBackups }" />
             </button>
           </div>
 
-          <!-- Thống kê Database & Lần đóng ca -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
-              <span class="text-[10px] text-slate-500 block mb-0.5">Dung lượng file DB</span>
-              <span class="text-sm font-bold text-emerald-600">{{ backupInfo?.fileSizeFormatted || '---' }}</span>
+          <!-- 1. Hero Action Banner: Đóng Ca Làm Việc -->
+          <div class="p-4 rounded-2xl bg-gradient-to-r from-indigo-50/80 via-slate-50/60 to-emerald-50/60 border border-indigo-100/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                  <Moon class="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Chốt Sổ Ca & Bàn Giao (Z-Report)</span>
+                </span>
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-100 text-emerald-700 border border-emerald-200/60">
+                  TỰ ĐỘNG ĐỒNG BỘ CLOUD
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-500 leading-relaxed max-w-md">
+                Tổng hợp tiền mặt trong két, doanh thu VietQR và tự động lưu bản sao lưu nén an toàn lên Cloud.
+              </p>
             </div>
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
-              <span class="text-[10px] text-slate-500 block mb-0.5">Tổng số Đơn hàng</span>
-              <span class="text-sm font-bold text-indigo-600">{{ backupInfo?.totalOrders ?? 0 }} đơn</span>
+
+            <button
+              type="button"
+              @click="isShiftModalOpen = true"
+              class="py-2.5 px-5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95 shrink-0"
+            >
+              <Moon class="w-4 h-4" />
+              <span>Mở Giao Diện Đóng Ca</span>
+            </button>
+          </div>
+
+          <!-- 2. Thống kê mini 4 cột đồng bộ -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
+              <span class="text-[10px] text-slate-400 block mb-0.5">Dung lượng Database</span>
+              <span class="text-xs font-bold text-slate-800">{{ backupInfo?.fileSizeFormatted || '---' }}</span>
             </div>
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
-              <span class="text-[10px] text-slate-500 block mb-0.5">Khoản mục Chi phí</span>
-              <span class="text-sm font-bold text-rose-600">{{ backupInfo?.totalExpenses ?? 0 }} khoản</span>
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
+              <span class="text-[10px] text-slate-400 block mb-0.5">Tổng đơn hoàn tất</span>
+              <span class="text-xs font-bold text-indigo-600">{{ backupInfo?.totalOrders ?? 0 }} đơn</span>
             </div>
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
-              <span class="text-[10px] text-slate-500 block mb-0.5">Đóng ca gần nhất</span>
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
+              <span class="text-[10px] text-slate-400 block mb-0.5">Khoản mục chi tiêu</span>
+              <span class="text-xs font-bold text-rose-600">{{ backupInfo?.totalExpenses ?? 0 }} khoản</span>
+            </div>
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
+              <span class="text-[10px] text-slate-400 block mb-0.5">Lần đóng ca gần nhất</span>
               <span class="text-xs font-bold text-slate-700 truncate block">{{ lastShiftCloseFormatted }}</span>
             </div>
           </div>
 
-          <!-- Các nút thao tác Đóng ca & Khôi phục -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-            <!-- Nút Đóng Ca & Tải Sao Lưu -->
-            <div class="p-4 rounded-xl bg-gradient-to-br from-slate-900 to-indigo-950 text-white flex flex-col justify-between space-y-3 shadow-md shadow-indigo-950/20">
-              <div>
-                <div class="flex items-center justify-between text-white font-bold text-xs mb-1">
-                  <div class="flex items-center gap-2">
-                    <Moon class="w-4 h-4 text-amber-400" />
-                    <span>1. Đóng Ca & Chốt Sổ Cuối Ngày</span>
-                  </div>
-                  <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-400/20 text-amber-300 border border-amber-400/30">
-                    KHUYÊN DÙNG
-                  </span>
-                </div>
-                <p class="text-[11px] text-slate-300 leading-relaxed">
-                  Tổng hợp tiền mặt trong két, doanh thu VietQR, in phiếu kết ca và tự động tải file sao lưu <code class="text-amber-300 font-mono">.db</code> về máy tính.
-                </p>
+          <!-- 3. Khu vực Bản Sao Lưu Đám Mây (Cloud Supabase) -->
+          <div class="space-y-2.5 pt-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <Cloud class="w-4 h-4 text-indigo-600" />
+                <h4 class="font-bold text-slate-900 text-xs">Bản Sao Lưu Cloud Supabase</h4>
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                  {{ cloudBackups.length }}/3 bản gần nhất
+                </span>
               </div>
 
-              <button
-                type="button"
-                @click="isShiftModalOpen = true"
-                class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md shadow-emerald-600/30 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95"
-              >
-                <Moon class="w-4 h-4" />
-                <span>Mở Giao Diện Đóng Ca & Tải File</span>
-              </button>
-            </div>
+              <!-- Nút Sao Lưu Ngay & Khôi Phục File .db Thủ Công -->
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  @click="triggerManualCloudBackup"
+                  :disabled="uploadingCloudBackup"
+                  class="py-1.5 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 border border-indigo-200/70 font-bold text-[11px] transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50 active:scale-95"
+                  title="Sao lưu ngay lập tức lên Cloud mà không cần đóng ca"
+                >
+                  <CloudUpload class="w-3.5 h-3.5 text-indigo-600" />
+                  <span>{{ uploadingCloudBackup ? 'Đang gửi...' : 'Sao Lưu Ngay' }}</span>
+                </button>
 
-            <!-- Nút Khôi Phục Dữ Liệu -->
-            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between space-y-3">
-              <div>
-                <div class="flex items-center gap-2 text-slate-900 font-bold text-xs mb-1">
-                  <Upload class="w-4 h-4 text-indigo-600" />
-                  <span>2. Khôi Phục Dữ Liệu Từ Ca Cũ (Restore)</span>
-                </div>
-                <p class="text-[11px] text-slate-500 leading-relaxed">
-                  Chọn file <code class="text-indigo-600 font-bold">.db</code> của ca làm việc hoặc ngày trước đó để nạp lại dữ liệu hoặc chuyển qua máy tính khác.
-                </p>
-              </div>
-
-              <div>
-                <input
-                  ref="fileInputRef"
-                  type="file"
-                  accept=".db"
-                  @change="onFileSelected"
-                  class="hidden"
-                />
                 <button
                   type="button"
                   @click="triggerFileInput"
                   :disabled="restoringBackup"
-                  class="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-indigo-600 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer active:scale-95 shadow-2xs"
+                  class="py-1.5 px-3 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold text-[11px] transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50 active:scale-95 shadow-2xs"
+                  title="Khôi phục từ file .db thủ công có sẵn trên máy"
                 >
-                  <Upload class="w-4 h-4" />
-                  <span>{{ restoringBackup ? 'Đang xử lý...' : 'Chọn File .db Để Khôi Phục' }}</span>
+                  <Upload class="w-3.5 h-3.5 text-slate-500" />
+                  <span class="hidden sm:inline">Khôi Phục File .db</span>
+                  <span class="sm:hidden">Nạp File</span>
                 </button>
+              </div>
+            </div>
+
+            <!-- Hidden File Input for Manual .db Restore -->
+            <input
+              ref="fileInputRef"
+              type="file"
+              accept=".db"
+              @change="onFileSelected"
+              class="hidden"
+            />
+
+            <!-- Danh sách các file backup dạng Bảng thẻ tinh tế -->
+            <div v-if="loadingCloudBackups" class="py-8 text-center text-slate-400 text-xs flex flex-col items-center gap-2 bg-slate-50/50 rounded-xl border border-slate-200/60">
+              <RefreshCw class="w-5 h-5 animate-spin text-indigo-500" />
+              <span>Đang kiểm tra danh sách bản sao lưu từ Cloud...</span>
+            </div>
+
+            <div v-else-if="cloudBackups.length === 0" class="p-6 rounded-xl bg-slate-50/70 border border-dashed border-slate-200 text-center text-xs">
+              <Cloud class="w-6 h-6 mx-auto mb-1 text-slate-400 stroke-1" />
+              <p class="font-medium text-slate-600">Chưa có bản sao lưu nào trên Đám mây</p>
+              <p class="text-[11px] text-slate-400 mt-0.5">Mỗi lần bạn đóng ca, hệ thống sẽ tự động đồng bộ file nén lên đây.</p>
+            </div>
+
+            <div v-else class="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs">
+              <div
+                v-for="(b, idx) in cloudBackups"
+                :key="b.fileName"
+                class="flex flex-col sm:flex-row sm:items-center justify-between p-3 hover:bg-slate-50/80 transition gap-2"
+              >
+                <div class="flex items-center gap-3">
+                  <div 
+                    class="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[10px] shrink-0"
+                    :class="idx === 0 ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-100 text-slate-500'"
+                  >
+                    {{ idx === 0 ? 'MỚI' : `#${idx + 1}` }}
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <p class="font-semibold text-slate-800 font-mono text-xs">{{ b.fileName }}</p>
+                      <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-slate-100 text-slate-600 font-mono">
+                        {{ b.fileSizeFormatted }}
+                      </span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-0.5">
+                      Thời gian sao lưu: {{ formatBackupDate(b.createdAt) }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
+                  <a
+                    :href="b.downloadUrl"
+                    target="_blank"
+                    class="px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-[11px] font-semibold transition flex items-center gap-1 border border-slate-200 cursor-pointer"
+                    title="Tải file zip về máy tính"
+                  >
+                    <Download class="w-3.5 h-3.5" />
+                    <span>Tải về</span>
+                  </a>
+
+                  <button
+                    type="button"
+                    @click="confirmRestoreCloudBackup(b)"
+                    :disabled="restoringCloudBackup"
+                    class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50 active:scale-95 shadow-2xs"
+                    title="Nạp lại toàn bộ dữ liệu từ bản sao lưu này"
+                  >
+                    <RefreshCw class="w-3.5 h-3.5" :class="{ 'animate-spin': restoringCloudBackup }" />
+                    <span>Khôi phục</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Ghi chú bảo mật & an toàn -->
-          <div class="flex items-start gap-2.5 bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-emerald-800 text-[11px] leading-relaxed">
-            <ShieldCheck class="w-4 h-4 shrink-0 mt-0.5 text-emerald-600" />
-            <span>
-              <strong>Quy trình đóng ca an toàn:</strong> Mỗi lần bấm đóng ca, file sao lưu sẽ được lưu trực tiếp vào máy tính của bạn với mốc thời gian rõ ràng. Dù máy chủ gặp sự cố, bạn luôn sở hữu dữ liệu mới nhất.
-            </span>
+          <!-- 4. Ghi chú bảo mật tối giản & thanh lịch -->
+          <div class="flex items-center justify-between text-[11px] text-slate-500 px-1 pt-1 border-t border-slate-100">
+            <div class="flex items-center gap-1.5">
+              <ShieldCheck class="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span>Dữ liệu được nén tự động mỗi khi đóng ca. Lưu trữ tối đa 3 bản mới nhất trên Supabase Cloud.</span>
+            </div>
+            <span class="text-[10px] text-slate-400 hidden sm:inline">An toàn • Không chiếm bộ nhớ máy</span>
           </div>
         </div>
 
@@ -321,6 +401,44 @@
           >
             <Key class="w-3.5 h-3.5 text-indigo-600" />
             <span>Nhập Mã Kích Hoạt / Gia Hạn</span>
+          </button>
+        </div>
+
+        <!-- Card Phiên Bản Phần Mềm & Cập Nhật -->
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3.5">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+            <div class="flex items-center gap-2">
+              <Sparkles class="w-4 h-4 text-indigo-600" />
+              <h3 class="font-bold text-slate-900 text-xs">Phiên Bản Phần Mềm</h3>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-indigo-50 text-indigo-600 border border-indigo-200">
+              v{{ systemVersionInfo.version }}
+            </span>
+          </div>
+
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between items-center text-slate-600">
+              <span>Hệ thống:</span>
+              <b class="text-slate-900">{{ systemVersionInfo.appName }}</b>
+            </div>
+            <div class="flex justify-between items-center text-slate-600">
+              <span>Phiên bản:</span>
+              <span class="font-bold text-slate-800">v{{ systemVersionInfo.version }} ({{ systemVersionInfo.edition }})</span>
+            </div>
+            <div class="flex justify-between items-center text-slate-600">
+              <span>Ngày build:</span>
+              <span class="text-slate-700">{{ systemVersionInfo.buildDate }}</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            @click="checkManualUpdate"
+            :disabled="checkingUpdate"
+            class="w-full py-2 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 border border-indigo-200 disabled:opacity-50"
+          >
+            <RefreshCw class="w-3.5 h-3.5" :class="{ 'animate-spin': checkingUpdate }" />
+            <span>{{ checkingUpdate ? 'Đang kiểm tra...' : 'Kiểm Tra Bản Cập Nhật Mới' }}</span>
           </button>
         </div>
       </div>
@@ -446,21 +564,13 @@
       </div>
     </div>
 
-    <!-- Toast message -->
-    <div 
-      v-if="toast" 
-      class="fixed bottom-6 right-6 z-50 bg-emerald-600 text-white font-bold text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 animate-bounce-short"
-    >
-      <CheckCircle2 class="w-4 h-4" />
-      <span>{{ toast }}</span>
-    </div>
-
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import api from '@/services/api'
+import { useNotify } from '@/composables/useNotify'
 import ShiftCloseModal from '@/components/ShiftCloseModal.vue'
 import {
   QrCode,
@@ -474,8 +584,13 @@ import {
   CheckCircle2,
   ShieldCheck,
   Moon,
-  Key
+  Key,
+  Cloud,
+  CloudUpload,
+  Sparkles
 } from 'lucide-vue-next'
+
+const { toast: notify, confirm: askConfirm } = useNotify()
 
 const setting = ref({
   shopName: 'DiroPos Store',
@@ -490,8 +605,43 @@ const setting = ref({
 })
 
 const banks = ref([])
-const toast = ref('')
 const saving = ref(false)
+
+// System Version State
+const systemVersionInfo = ref({
+  version: '1.0.0',
+  appName: 'DiroPos PRO',
+  buildDate: '2026-09-30',
+  edition: 'PRO Commercial'
+})
+const checkingUpdate = ref(false)
+
+async function loadVersionInfo() {
+  try {
+    const res = await api.getSystemVersion()
+    if (res?.data) {
+      systemVersionInfo.value = res.data
+    }
+  } catch (err) {
+    console.warn('Lỗi lấy thông tin phiên bản:', err)
+  }
+}
+
+async function checkManualUpdate() {
+  checkingUpdate.value = true
+  try {
+    const res = await api.checkUpdate()
+    if (res?.data?.hasUpdate) {
+      notify.info(`Đã có bản cập nhật mới v${res.data.latestVersion}! Vui lòng bấm thông báo để nâng cấp.`, 'Có Bản Cập Nhật Mới!')
+    } else {
+      notify.success(`Bạn đang sử dụng phiên bản mới nhất (v${systemVersionInfo.value.version}).`, 'Hệ Thống Đã Cập Nhật')
+    }
+  } catch (err) {
+    notify.error('Không thể kiểm tra bản cập nhật lúc này.')
+  } finally {
+    checkingUpdate.value = false
+  }
+}
 
 // License State
 const licenseInfo = ref(null)
@@ -526,13 +676,13 @@ async function handleActivateLicense() {
   try {
     const res = await api.activateLicense(licenseInputKey.value.trim())
     if (res?.data) {
-      showToast(res.data.message || 'Kích hoạt bản quyền thành công!')
+      notify.success(res.data.message || 'Kích hoạt bản quyền thành công!')
       showLicenseModal.value = false
       licenseInputKey.value = ''
       await loadLicenseInfo()
     }
   } catch (err) {
-    alert(err.response?.data?.message || err.message || 'Mã bản quyền không hợp lệ.')
+    notify.error(err.response?.data?.message || err.message || 'Mã bản quyền không hợp lệ.')
   } finally {
     activatingLicense.value = false
   }
@@ -548,6 +698,12 @@ const restoringBackup = ref(false)
 const showRestoreModal = ref(false)
 const selectedFile = ref(null)
 const fileInputRef = ref(null)
+
+// Cloud Backup State
+const cloudBackups = ref([])
+const loadingCloudBackups = ref(false)
+const uploadingCloudBackup = ref(false)
+const restoringCloudBackup = ref(false)
 
 const lastShiftCloseFormatted = computed(() => {
   if (!lastShiftClose.value) return 'Chưa đóng ca'
@@ -565,15 +721,81 @@ const lastShiftCloseFormatted = computed(() => {
 
 function onShiftCompleted(event) {
   lastShiftClose.value = event.time
-  showToast(`Đã đóng ca thành công! Đã lưu file: ${event.fileName}`)
+  notify.success('Đã đóng ca thành công! Dữ liệu đã được đồng bộ lên Cloud an toàn.')
   loadBackupInfo()
+  loadCloudBackups()
 }
 
 function showToast(msg) {
-  toast.value = msg
-  setTimeout(() => {
-    toast.value = ''
-  }, 3500)
+  notify.success(msg)
+}
+
+function formatBackupDate(isoStr) {
+  if (!isoStr) return '---'
+  try {
+    const d = new Date(isoStr)
+    const hh = String(d.getHours()).padStart(2, '0')
+    const mm = String(d.getMinutes()).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const year = d.getFullYear()
+    return `${hh}:${mm} - ${day}/${month}/${year}`
+  } catch {
+    return isoStr
+  }
+}
+
+async function loadCloudBackups() {
+  loadingCloudBackups.value = true
+  try {
+    const res = await api.getCloudBackups()
+    if (res.data) {
+      cloudBackups.value = res.data
+    }
+  } catch (err) {
+    console.error('Lỗi khi tải danh sách backup cloud:', err)
+  } finally {
+    loadingCloudBackups.value = false
+  }
+}
+
+async function triggerManualCloudBackup() {
+  uploadingCloudBackup.value = true
+  try {
+    const res = await api.uploadCloudBackup()
+    if (res.data?.success) {
+      notify.success(res.data.message || 'Đã sao lưu lên Cloud thành công!')
+      await loadCloudBackups()
+    }
+  } catch (err) {
+    notify.error('Lỗi khi sao lưu lên Cloud: ' + (err.response?.data || err.message))
+  } finally {
+    uploadingCloudBackup.value = false
+  }
+}
+
+async function confirmRestoreCloudBackup(b) {
+  const ok = await askConfirm({
+    title: 'Xác Nhận Khôi Phục Dữ Liệu Cloud?',
+    message: `Bạn đang chọn khôi phục từ bản sao lưu Cloud:\n• File: ${b.fileName}\n• Ngày tạo: ${formatBackupDate(b.createdAt)}\n\nLưu ý: Toàn bộ dữ liệu bán hàng hiện tại sẽ được nạp lại theo bản này (hệ thống sẽ tự động lưu 1 bản dự phòng trước khi khôi phục). Bạn có chắc chắn muốn tiếp tục?`,
+    type: 'warning',
+    confirmText: 'Khôi phục ngay',
+    cancelText: 'Hủy bỏ'
+  })
+  if (!ok) return
+
+  restoringCloudBackup.value = true
+  try {
+    const res = await api.restoreCloudBackup({ fileName: b.fileName })
+    notify.success(res.data?.message || 'Khôi phục dữ liệu từ Cloud thành công!')
+    setTimeout(() => {
+      window.location.reload()
+    }, 1200)
+  } catch (err) {
+    notify.error('Lỗi khôi phục từ Cloud: ' + (err.response?.data || err.message))
+  } finally {
+    restoringCloudBackup.value = false
+  }
 }
 
 async function loadData() {
@@ -584,7 +806,10 @@ async function loadData() {
     ])
     if (setRes.data) setting.value = setRes.data
     if (bankRes.data) banks.value = bankRes.data
-    await loadLicenseInfo()
+    await Promise.all([
+      loadLicenseInfo(),
+      loadVersionInfo()
+    ])
   } catch (err) {
     console.error('Lỗi khi tải cài đặt:', err)
   }
@@ -607,6 +832,7 @@ async function loadBackupInfo() {
 onMounted(() => {
   loadData()
   loadBackupInfo()
+  loadCloudBackups()
 })
 
 function onBankChange() {
@@ -638,10 +864,10 @@ async function saveSettings() {
         ownerName: licenseInfo.value?.ownerName || ''
       })
     } catch { }
-    showToast('Đã lưu cấu hình DiroPos & đồng bộ lên hệ thống quản trị thành công!')
+    notify.success('Đã lưu cấu hình DiroPos & đồng bộ lên hệ thống quản trị thành công!')
     await loadLicenseInfo()
   } catch (err) {
-    alert('Lỗi khi lưu cài đặt: ' + (err.response?.data || err.message))
+    notify.error('Lỗi khi lưu cài đặt: ' + (err.response?.data || err.message))
   } finally {
     saving.value = false
   }
@@ -665,11 +891,11 @@ async function downloadDbBackup() {
     document.body.removeChild(link)
     window.URL.revokeObjectURL(downloadUrl)
 
-    showToast('Đã tải bản sao lưu cơ sở dữ liệu thành công!')
+    notify.success('Đã tải bản sao lưu cơ sở dữ liệu thành công!')
     loadBackupInfo()
   } catch (err) {
     console.error('Lỗi sao lưu:', err)
-    alert('Không thể tải file sao lưu: ' + (err.response?.data || err.message))
+    notify.error('Không thể tải file sao lưu: ' + (err.response?.data || err.message))
   } finally {
     downloadingBackup.value = false
   }
@@ -688,7 +914,7 @@ function onFileSelected(event) {
   if (!file) return
 
   if (!file.name.endsWith('.db')) {
-    alert('Vui lòng chọn file có phần mở rộng .db')
+    notify.warning('Vui lòng chọn file có phần mở rộng .db')
     return
   }
 
@@ -712,7 +938,7 @@ async function confirmRestore() {
     const res = await api.restoreBackup(formData)
     showRestoreModal.value = false
     selectedFile.value = null
-    showToast(res.data?.message || 'Đã khôi phục dữ liệu thành công!')
+    notify.success(res.data?.message || 'Đã khôi phục dữ liệu thành công!')
     
     await Promise.all([
       loadData(),
@@ -720,7 +946,7 @@ async function confirmRestore() {
     ])
   } catch (err) {
     console.error('Lỗi khi khôi phục:', err)
-    alert('Lỗi khôi phục dữ liệu: ' + (err.response?.data || err.message))
+    notify.error('Lỗi khôi phục dữ liệu: ' + (err.response?.data || err.message))
   } finally {
     restoringBackup.value = false
   }

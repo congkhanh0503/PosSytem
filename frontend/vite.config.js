@@ -19,5 +19,13 @@ export default defineConfig({
         secure: false
       }
     }
+  },
+  build: {
+    sourcemap: false,
+    minify: 'esbuild',
+    chunkSizeWarningLimit: 1000
+  },
+  esbuild: {
+    drop: ['console', 'debugger']
   }
 })

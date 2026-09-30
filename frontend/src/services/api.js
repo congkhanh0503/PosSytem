@@ -1,11 +1,33 @@
 import axios from 'axios'
+import { useNotify } from '@/composables/useNotify'
 
 const apiClient = axios.create({
   baseURL: '/api',
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  timeout: 30000
 })
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const { toast } = useNotify()
+
+    if (!error.response) {
+      if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+        toast.error('Kết nối quá thời gian chờ (Timeout). Vui lòng thử lại!', 'Lỗi Kết Nối')
+      } else {
+        toast.error('Không thể kết nối đến máy chủ POS nội bộ!', 'Mất Kết Nối')
+      }
+    } else if (error.response.status >= 500) {
+      const serverMsg = error.response.data?.message || 'Máy chủ POS gặp sự cố nội bộ. Vui lòng thử lại!'
+      toast.error(serverMsg, `Lỗi Hệ Thống (${error.response.status})`)
+    }
+
+    return Promise.reject(error)
+  }
+)
 
 export const api = {
   // Services
@@ -30,7 +52,7 @@ export const api = {
   createOrder: (orderData) => apiClient.post('/orders', orderData),
   updateOrder: (id, orderData) => apiClient.put(`/orders/${id}`, orderData),
   deleteOrder: (id) => apiClient.delete(`/orders/${id}`),
-  cancelOrder: (id) => apiClient.post(`/orders/${id}/cancel`),
+  cancelOrder: (id, data) => apiClient.post(`/orders/${id}/cancel`, data),
 
   // Service Categories
   getServiceCategories: () => apiClient.get('/servicecategories'),
@@ -70,13 +92,20 @@ export const api = {
   restoreBackup: (formData) => apiClient.post('/backup/restore', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
+  uploadCloudBackup: () => apiClient.post('/backup/cloud-upload'),
+  getCloudBackups: () => apiClient.get('/backup/cloud-list'),
+  restoreCloudBackup: (data) => apiClient.post('/backup/cloud-restore', data),
 
   // License & Bản quyền
   getLicenseStatus: () => apiClient.get('/license/status'),
   activateLicense: (licenseKey) => apiClient.post('/license/activate', { licenseKey }),
   syncLicense: () => apiClient.post('/license/sync'),
   initShop: (data) => apiClient.post('/license/init-shop', data),
-  updateShopProfile: (data) => apiClient.post('/license/update-profile', data)
+  updateShopProfile: (data) => apiClient.post('/license/update-profile', data),
+
+  // Hệ Thống & Phiên Bản (Version Management)
+  getSystemVersion: () => apiClient.get('/system/version'),
+  checkUpdate: () => apiClient.get('/system/check-update')
 }
 
 export default api

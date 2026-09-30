@@ -286,7 +286,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import api from '@/services/api'
+import { useNotify } from '@/composables/useNotify'
 import { Plus, Edit3, Trash2, Layers } from 'lucide-vue-next'
+
+const { toast, confirm } = useNotify()
 
 const services = ref([])
 const isModalOpen = ref(false)
@@ -373,30 +376,41 @@ async function saveService() {
   try {
     if (editingId.value) {
       await api.updateService(editingId.value, { ...form.value, id: editingId.value })
+      toast.success('Cập nhật dịch vụ thành công!')
     } else {
       await api.createService(form.value)
+      toast.success('Thêm dịch vụ mới thành công!')
     }
     isModalOpen.value = false
     loadServices()
   } catch (err) {
-    alert('Lỗi lưu dịch vụ: ' + err.message)
+    toast.error('Lỗi lưu dịch vụ: ' + err.message)
   }
 }
 
 async function deleteService(id) {
-  if (!confirm('Bạn có chắc chắn muốn xóa dịch vụ này?')) return
+  const ok = await confirm({
+    title: 'Xóa dịch vụ?',
+    message: 'Bạn có chắc chắn muốn xóa dịch vụ này không?',
+    type: 'danger',
+    confirmText: 'Xóa ngay',
+    cancelText: 'Hủy'
+  })
+  if (!ok) return
+
   try {
     await api.deleteService(id)
+    toast.success('Đã xóa dịch vụ thành công!')
     loadServices()
   } catch (err) {
-    alert('Không thể xóa: ' + err.message)
+    toast.error('Không thể xóa: ' + err.message)
   }
 }
 
 async function addCategory() {
   const name = newCatName.value.trim()
   if (!name) {
-    alert('Vui lòng nhập tên phân loại!')
+    toast.warning('Vui lòng nhập tên phân loại!')
     return
   }
 
@@ -406,22 +420,32 @@ async function addCategory() {
       color: selectedColor.value
     })
     newCatName.value = ''
+    toast.success('Thêm phân loại thành công!')
     loadCategories()
   } catch (err) {
-    alert('Lỗi thêm phân loại: ' + (err.response?.data || err.message))
+    toast.error('Lỗi thêm phân loại: ' + (err.response?.data || err.message))
   }
 }
 
 async function deleteCategory(cat) {
-  if (!confirm(`Bạn có chắc muốn xóa phân loại "${cat.name}"?`)) return
+  const ok = await confirm({
+    title: 'Xóa phân loại?',
+    message: `Bạn có chắc muốn xóa phân loại "${cat.name}"?`,
+    type: 'danger',
+    confirmText: 'Xóa',
+    cancelText: 'Hủy'
+  })
+  if (!ok) return
+
   try {
     if (cat.id) {
       await api.deleteServiceCategory(cat.id)
     }
     categories.value = categories.value.filter(c => c.name !== cat.name)
+    toast.success('Đã xóa phân loại thành công!')
     loadCategories()
   } catch (err) {
-    alert('Lỗi xóa phân loại: ' + (err.response?.data || err.message))
+    toast.error('Lỗi xóa phân loại: ' + (err.response?.data || err.message))
   }
 }
 

@@ -287,7 +287,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import api from '@/services/api'
+import { useNotify } from '@/composables/useNotify'
 import { Plus, Edit3, Trash2, ArrowDownRight, Calendar, Receipt, RotateCcw } from 'lucide-vue-next'
+
+const { toast, confirm } = useNotify()
 
 const expenses = ref([])
 const categories = ref([
@@ -471,23 +474,34 @@ async function saveExpense() {
   try {
     if (editingId.value) {
       await api.updateExpense(editingId.value, { ...form.value, id: editingId.value })
+      toast.success('Cập nhật khoản chi thành công!')
     } else {
       await api.createExpense(form.value)
+      toast.success('Thêm khoản chi mới thành công!')
     }
     isModalOpen.value = false
     loadExpenses()
   } catch (err) {
-    alert('Lỗi lưu khoản chi: ' + err.message)
+    toast.error('Lỗi lưu khoản chi: ' + err.message)
   }
 }
 
 async function deleteExpense(id) {
-  if (!confirm('Bạn có chắc chắn muốn xóa khoản chi này?')) return
+  const ok = await confirm({
+    title: 'Xóa khoản chi?',
+    message: 'Bạn có chắc chắn muốn xóa khoản chi này không?',
+    type: 'danger',
+    confirmText: 'Xóa ngay',
+    cancelText: 'Hủy'
+  })
+  if (!ok) return
+
   try {
     await api.deleteExpense(id)
+    toast.success('Đã xóa khoản chi thành công!')
     loadExpenses()
   } catch (err) {
-    alert('Không thể xóa: ' + err.message)
+    toast.error('Không thể xóa: ' + err.message)
   }
 }
 </script>

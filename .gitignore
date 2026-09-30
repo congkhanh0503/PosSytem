@@ -36,3 +36,4 @@ Thumbs.db
 publish/
 *.zip
 wwwroot/
+installer_output/

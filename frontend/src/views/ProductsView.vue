@@ -409,7 +409,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import api from '@/services/api'
+import { useNotify } from '@/composables/useNotify'
 import { Plus, Edit3, Trash2, Layers, ShoppingCart, Box, Search } from 'lucide-vue-next'
+
+const { toast, confirm } = useNotify()
 
 const products = ref([])
 const isModalOpen = ref(false)
@@ -531,9 +534,10 @@ async function togglePos(prod) {
   prod.showOnPos = !currentVal
   try {
     await api.toggleShowOnPos(prod.id)
+    toast.info(prod.showOnPos ? 'Đã bật hiển thị bán tại POS' : 'Đã chuyển thành sản phẩm kho nội bộ')
   } catch (err) {
     prod.showOnPos = currentVal
-    alert('Không thể cập nhật trạng thái hiển thị POS: ' + (err.response?.data || err.message))
+    toast.error('Không thể cập nhật trạng thái hiển thị POS: ' + (err.response?.data || err.message))
   }
 }
 
@@ -541,30 +545,41 @@ async function saveProduct() {
   try {
     if (editingId.value) {
       await api.updateProduct(editingId.value, { ...form.value, id: editingId.value })
+      toast.success('Cập nhật sản phẩm thành công!')
     } else {
       await api.createProduct(form.value)
+      toast.success('Thêm sản phẩm mới thành công!')
     }
     isModalOpen.value = false
     loadProducts()
   } catch (err) {
-    alert('Lỗi lưu sản phẩm: ' + err.message)
+    toast.error('Lỗi lưu sản phẩm: ' + err.message)
   }
 }
 
 async function deleteProduct(id) {
-  if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) return
+  const ok = await confirm({
+    title: 'Xóa sản phẩm?',
+    message: 'Bạn có chắc chắn muốn xóa sản phẩm này không?',
+    type: 'danger',
+    confirmText: 'Xóa ngay',
+    cancelText: 'Hủy'
+  })
+  if (!ok) return
+
   try {
     await api.deleteProduct(id)
+    toast.success('Đã xóa sản phẩm thành công!')
     loadProducts()
   } catch (err) {
-    alert('Không thể xóa: ' + err.message)
+    toast.error('Không thể xóa: ' + err.message)
   }
 }
 
 async function addCategory() {
   const name = newCatName.value.trim()
   if (!name) {
-    alert('Vui lòng nhập tên phân loại!')
+    toast.warning('Vui lòng nhập tên phân loại!')
     return
   }
 
@@ -574,22 +589,32 @@ async function addCategory() {
       color: selectedColor.value
     })
     newCatName.value = ''
+    toast.success('Thêm phân loại thành công!')
     loadCategories()
   } catch (err) {
-    alert('Lỗi thêm phân loại: ' + (err.response?.data || err.message))
+    toast.error('Lỗi thêm phân loại: ' + (err.response?.data || err.message))
   }
 }
 
 async function deleteCategory(cat) {
-  if (!confirm(`Bạn có chắc muốn xóa phân loại "${cat.name}"?`)) return
+  const ok = await confirm({
+    title: 'Xóa phân loại?',
+    message: `Bạn có chắc muốn xóa phân loại "${cat.name}"?`,
+    type: 'danger',
+    confirmText: 'Xóa',
+    cancelText: 'Hủy'
+  })
+  if (!ok) return
+
   try {
     if (cat.id) {
       await api.deleteProductCategory(cat.id)
     }
     categories.value = categories.value.filter(c => c.name !== cat.name)
+    toast.success('Đã xóa phân loại thành công!')
     loadCategories()
   } catch (err) {
-    alert('Lỗi xóa phân loại: ' + (err.response?.data || err.message))
+    toast.error('Lỗi xóa phân loại: ' + (err.response?.data || err.message))
   }
 }
 

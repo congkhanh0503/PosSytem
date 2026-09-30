@@ -26,6 +26,15 @@
         <p class="text-xs text-slate-500">{{ formatDate(order.createdAt) }} • Hình thức: {{ order.paymentMethod }}</p>
       </div>
 
+      <!-- Cancelled Alert Banner -->
+      <div v-if="order.paymentStatus === 'Cancelled'" class="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-start gap-2">
+        <span class="text-base">⚠️</span>
+        <div>
+          <p class="font-bold">Đơn hàng này đã bị HỦY</p>
+          <p class="text-[11px] text-rose-600 mt-0.5">Doanh thu đơn này không tính vào sổ sách tài chính. Tồn kho sản phẩm đã được hoàn lại.</p>
+        </div>
+      </div>
+
       <!-- Customer & Note -->
       <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 text-xs space-y-1.5 mb-4">
         <div class="flex justify-between">
@@ -34,7 +43,7 @@
         </div>
         <div v-if="order.note" class="pt-1.5 border-t border-slate-200">
           <span class="text-slate-500 block mb-0.5">Ghi chú đơn hàng:</span>
-          <p class="text-slate-700 italic bg-white p-2 rounded border border-slate-200/60">{{ order.note }}</p>
+          <p class="text-slate-700 italic bg-white p-2 rounded border border-slate-200/60 whitespace-pre-wrap">{{ order.note }}</p>
         </div>
       </div>
 
@@ -52,10 +61,10 @@
             >
               {{ item.itemType === 'Service' ? 'Dịch vụ' : 'Sản phẩm' }}
             </span>
-            <span class="text-slate-800 font-medium">{{ item.itemName }}</span>
+            <span class="text-slate-800 font-medium" :class="order.paymentStatus === 'Cancelled' ? 'line-through text-slate-400' : ''">{{ item.itemName }}</span>
             <span class="text-slate-400">x{{ item.quantity }}</span>
           </div>
-          <span class="text-slate-900 font-semibold">{{ formatCurrency(item.totalPrice) }}</span>
+          <span class="text-slate-900 font-semibold" :class="order.paymentStatus === 'Cancelled' ? 'line-through text-slate-400' : ''">{{ formatCurrency(item.totalPrice) }}</span>
         </div>
       </div>
 
@@ -63,7 +72,7 @@
       <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
         <div class="flex justify-between text-slate-500">
           <span>Tạm tính (tiền gốc):</span>
-          <span>{{ formatCurrency(order.subTotal) }}</span>
+          <span :class="order.paymentStatus === 'Cancelled' ? 'line-through text-slate-400' : ''">{{ formatCurrency(order.subTotal) }}</span>
         </div>
         <div v-if="order.discountPercent > 0" class="flex justify-between text-emerald-600 font-medium">
           <span>Giảm giá ({{ order.discountPercent }}%):</span>
@@ -71,30 +80,28 @@
         </div>
         <div class="flex justify-between text-sm font-bold text-slate-900 pt-2 border-t border-slate-200">
           <span>Tổng thực thu:</span>
-          <span class="text-indigo-600 text-base">{{ formatCurrency(order.finalAmount) }}</span>
+          <span :class="order.paymentStatus === 'Cancelled' ? 'line-through text-slate-400 text-sm' : 'text-indigo-600 text-base'">
+            {{ formatCurrency(order.finalAmount) }}
+          </span>
         </div>
       </div>
 
       <!-- Actions -->
       <div class="mt-6 flex flex-wrap gap-2.5">
         <button
+          v-if="order.paymentStatus === 'Completed'"
           @click="$emit('edit-order', order)"
           class="py-2 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 font-semibold text-xs transition flex items-center gap-1.5"
         >
           <span>✏️</span> Sửa Đơn
         </button>
         <button
-          @click="$emit('delete-order', order.id)"
-          class="py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-semibold text-xs transition flex items-center gap-1.5"
-        >
-          <span>🗑️</span> Xóa Đơn
-        </button>
-        <button
           v-if="order.paymentStatus === 'Completed'"
-          @click="$emit('cancel-order', order.id)"
-          class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition"
+          @click="$emit('cancel-order', order)"
+          class="py-2 px-3.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-semibold text-xs transition flex items-center gap-1.5"
+          title="Hủy đơn hàng và hoàn tồn kho"
         >
-          Hủy Bỏ
+          <span>🚫</span> Hủy Đơn Hàng
         </button>
         <button
           @click="$emit('close')"
@@ -114,7 +121,7 @@ defineProps({
   order: Object
 })
 
-defineEmits(['close', 'cancel-order', 'edit-order', 'delete-order'])
+defineEmits(['close', 'cancel-order', 'edit-order'])
 
 function formatCurrency(val) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0)

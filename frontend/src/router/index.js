@@ -58,7 +58,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  document.title = `${to.meta.title || 'POS'} | Công Barber`
+  document.title = `${to.meta.title || 'POS'}`
   next()
 })
 

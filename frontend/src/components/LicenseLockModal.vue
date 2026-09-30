@@ -202,6 +202,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import api from '@/services/api'
+import { useNotify } from '@/composables/useNotify'
 import {
   Lock,
   Key,
@@ -209,6 +210,8 @@ import {
   AlertCircle,
   RefreshCw
 } from 'lucide-vue-next'
+
+const { toast } = useNotify()
 
 const license = ref(null)
 const inputKey = ref('')
@@ -249,13 +252,14 @@ async function handleSync() {
     if (res?.data?.status) {
       license.value = res.data.status
       if (res.data.status.isValid) {
-        alert('Chúc mừng! Máy POS đã nhận bản quyền mới và tự động mở khóa!')
+        toast.success('Chúc mừng! Máy POS đã nhận bản quyền mới và tự động mở khóa!')
       } else {
-        alert(res.data.status.message || 'Bản quyền chưa được gia hạn trên máy chủ Admin.')
+        toast.warning(res.data.status.message || 'Bản quyền chưa được gia hạn trên máy chủ Admin.')
       }
     }
   } catch (err) {
     console.warn('Không thể đồng bộ bản quyền với server:', err)
+    toast.error('Không thể kết nối máy chủ để đồng bộ bản quyền.')
   } finally {
     syncing.value = false
   }
@@ -269,13 +273,14 @@ async function handleActivate() {
   try {
     const res = await api.activateLicense(inputKey.value.trim())
     if (res?.data) {
-      alert(res.data.message || 'Kích hoạt bản quyền thành công!')
+      toast.success(res.data.message || 'Kích hoạt bản quyền thành công!')
       license.value = res.data.status
       showActivateDialog.value = false
       inputKey.value = ''
     }
   } catch (err) {
     errorMsg.value = err.response?.data?.message || err.message || 'Mã bản quyền không hợp lệ.'
+    toast.error(errorMsg.value)
   } finally {
     loading.value = false
   }

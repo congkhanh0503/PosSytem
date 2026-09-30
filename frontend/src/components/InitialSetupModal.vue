@@ -126,7 +126,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import api from '@/services/api'
+import { useNotify } from '@/composables/useNotify'
 import { Store, CheckCircle2 } from 'lucide-vue-next'
+
+const { toast } = useNotify()
 
 const isOpen = ref(false)
 const loading = ref(false)
@@ -172,13 +175,16 @@ async function handleSubmit() {
 
   try {
     const res = await api.initShop(form.value)
-    if (res?.data?.success) {
+    if (res?.data?.success || res?.status === 200 || res?.data?.status) {
       isOpen.value = false
-      alert(`Khởi tạo thành công quán "${form.value.shopName}"! Chúc bạn kinh doanh hồng phát!`)
-      window.location.reload()
+      toast.success(`Khởi tạo thành công quán "${form.value.shopName}"! Chúc bạn kinh doanh hồng phát!`)
+      setTimeout(() => {
+        window.location.reload()
+      }, 1500)
     }
   } catch (err) {
     errorMsg.value = err.response?.data?.message || err.message || 'Lỗi thiết lập thông tin quán.'
+    toast.error(errorMsg.value)
   } finally {
     loading.value = false
   }
