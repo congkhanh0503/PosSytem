@@ -1,4 +1,5 @@
 using DiroPos.Api.Data;
+using DiroPos.Api.Models;
 using DiroPos.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
@@ -161,7 +162,16 @@ public class BackupController : ControllerBase
         }
 
         string dbPath = GetDbPath();
-        string preRestoreBakPath = $"diropos_{DateTime.UtcNow:yyyyMMdd_HHmmss}.bak";
+        string dbDir = Path.GetDirectoryName(Path.GetFullPath(dbPath)) ?? AppDomain.CurrentDomain.BaseDirectory;
+        string preRestoreBakPath = Path.Combine(dbDir, $"diropos_{DateTime.UtcNow:yyyyMMdd_HHmmss}.bak");
+
+        // 0. Lưu lại thông tin bản quyền và cấu hình định danh tiệm hiện tại trước khi khôi phục
+        SystemLicense? currentLicense = null;
+        try
+        {
+            currentLicense = await _context.SystemLicenses.AsNoTracking().FirstOrDefaultAsync();
+        }
+        catch { }
 
         try
         {
@@ -179,6 +189,9 @@ public class BackupController : ControllerBase
             {
                 await file.CopyToAsync(fileStream);
             }
+
+            // 4. Bảo toàn thông tin bản quyền và đồng bộ hạn dùng mới nhất từ Cloud Supabase
+            await PreserveLicenseAfterRestoreAsync(currentLicense);
 
             return Ok(new
             {
@@ -412,7 +425,16 @@ public class BackupController : ControllerBase
         string tempZipPath = Path.Combine(Path.GetTempPath(), $"restore_{Guid.NewGuid():N}.zip");
         string tempExtractedDbPath = Path.Combine(Path.GetTempPath(), $"extracted_{Guid.NewGuid():N}.db");
         string dbPath = GetDbPath();
-        string preRestoreBakPath = $"diropos_pre_restore_{DateTime.UtcNow:yyyyMMdd_HHmmss}.bak";
+        string dbDir = Path.GetDirectoryName(Path.GetFullPath(dbPath)) ?? AppDomain.CurrentDomain.BaseDirectory;
+        string preRestoreBakPath = Path.Combine(dbDir, $"diropos_pre_restore_{DateTime.UtcNow:yyyyMMdd_HHmmss}.bak");
+
+        // 0. Lưu lại thông tin bản quyền và cấu hình định danh tiệm hiện tại trước khi khôi phục
+        SystemLicense? currentLicense = null;
+        try
+        {
+            currentLicense = await _context.SystemLicenses.AsNoTracking().FirstOrDefaultAsync();
+        }
+        catch { }
 
         try
         {
@@ -465,6 +487,9 @@ public class BackupController : ControllerBase
                 await src.CopyToAsync(dest);
             }
 
+            // 4. Bảo toàn thông tin bản quyền và đồng bộ hạn dùng mới nhất từ Cloud Supabase
+            await PreserveLicenseAfterRestoreAsync(currentLicense);
+
             return Ok(new
             {
                 Success = true,
@@ -486,6 +511,55 @@ public class BackupController : ControllerBase
             {
                 try { System.IO.File.Delete(tempExtractedDbPath); } catch { }
             }
+        }
+    }
+
+    private async Task PreserveLicenseAfterRestoreAsync(SystemLicense? currentLicense)
+    {
+        if (currentLicense == null) return;
+
+        try
+        {
+            // Mở scope dịch vụ mới để kết nối tới file database vừa được khôi phục
+            using var scope = HttpContext.RequestServices.CreateScope();
+            var newContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var newLicenseSvc = scope.ServiceProvider.GetRequiredService<ILicenseService>();
+
+            var targetLicense = await newContext.SystemLicenses.FirstOrDefaultAsync();
+            if (targetLicense == null)
+            {
+                targetLicense = new SystemLicense { Id = 1 };
+                newContext.SystemLicenses.Add(targetLicense);
+            }
+
+            // Bảo toàn toàn bộ thông tin bản quyền và định danh hiện tại của cửa hàng
+            targetLicense.ShopCode = currentLicense.ShopCode;
+            targetLicense.ShopName = currentLicense.ShopName;
+            targetLicense.LicenseKey = currentLicense.LicenseKey;
+            targetLicense.PlanType = currentLicense.PlanType;
+            targetLicense.ActivatedAt = currentLicense.ActivatedAt;
+            targetLicense.ExpiresAt = currentLicense.ExpiresAt;
+            targetLicense.Status = currentLicense.Status;
+            targetLicense.HardwareId = currentLicense.HardwareId;
+            targetLicense.ContactPhone = currentLicense.ContactPhone;
+            targetLicense.LastCheckedAt = currentLicense.LastCheckedAt;
+            targetLicense.IsInitialized = currentLicense.IsInitialized;
+            targetLicense.BusinessModel = currentLicense.BusinessModel;
+            targetLicense.OwnerName = currentLicense.OwnerName;
+            targetLicense.Address = currentLicense.Address;
+
+            await newContext.SaveChangesAsync();
+
+            // Đồng bộ lại với máy chủ Supabase để cập nhật số ngày bản quyền chuẩn nhất
+            try
+            {
+                await newLicenseSvc.SyncWithServerAsync();
+            }
+            catch { }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[RestoreBackup] Lỗi bảo toàn bản quyền: {ex.Message}");
         }
     }
 }
