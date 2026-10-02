@@ -349,7 +349,7 @@
         <div class="grid grid-cols-2 gap-2 pt-1">
           <!-- Nút VietQR (Ưu tiên) -->
           <button
-            @click="handleCheckout('VietQR')"
+            @click="openConfirmModal('VietQR')"
             :disabled="pos.cart.length === 0 || pos.isLoading"
             class="py-3 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold text-xs sm:text-sm shadow-md shadow-indigo-500/25 transition flex items-center justify-center gap-1.5 active:scale-95"
           >
@@ -359,7 +359,7 @@
 
           <!-- Nút Tiền mặt -->
           <button
-            @click="handleCheckout('Cash')"
+            @click="openConfirmModal('Cash')"
             :disabled="pos.cart.length === 0 || pos.isLoading"
             class="py-3 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed text-slate-800 font-bold text-xs sm:text-sm border border-slate-200 transition flex items-center justify-center gap-1.5 active:scale-95"
           >
@@ -371,6 +371,23 @@
       </div>
 
     </div>
+
+    <!-- Modal Xác Nhận Đơn Hàng Trước Khi Thanh Toán -->
+    <OrderConfirmModal
+      :isOpen="isConfirmModalOpen"
+      :initialMethod="confirmMethod"
+      :cart="pos.cart"
+      :customerName="pos.customerName"
+      :customerPhone="pos.customerPhone"
+      :note="pos.note"
+      :subTotal="pos.subTotal"
+      :discountPercent="pos.discountPercent"
+      :discountAmount="pos.discountAmount"
+      :finalAmount="pos.finalAmount"
+      :isLoading="pos.isLoading"
+      @close="isConfirmModalOpen = false"
+      @confirm="executeCheckout"
+    />
 
     <!-- Popup Modal VietQR -->
     <VietQrModal
@@ -389,6 +406,7 @@ import { usePosStore } from '@/stores/posStore'
 import api from '@/services/api'
 import { useNotify } from '@/composables/useNotify'
 import VietQrModal from '@/components/VietQrModal.vue'
+import OrderConfirmModal from '@/components/OrderConfirmModal.vue'
 import { 
   Sparkles,
   Package, 
@@ -414,6 +432,9 @@ const searchQuery = ref('')
 const isQrModalOpen = ref(false)
 const currentVietQr = ref(null)
 const currentCreatedOrder = ref(null)
+
+const isConfirmModalOpen = ref(false)
+const confirmMethod = ref('Cash')
 
 const serviceCategories = ref([])
 const productCategories = ref([])
@@ -500,7 +521,13 @@ async function loadData() {
   }
 }
 
-async function handleCheckout(method) {
+function openConfirmModal(method) {
+  if (pos.cart.length === 0 || pos.isLoading) return
+  confirmMethod.value = method || 'Cash'
+  isConfirmModalOpen.value = true
+}
+
+async function executeCheckout(method) {
   if (pos.cart.length === 0 || pos.isLoading) return
 
   try {
@@ -508,6 +535,7 @@ async function handleCheckout(method) {
     if (method === 'Cash') {
       const res = await pos.checkout('Cash')
       const order = res.order || res
+      isConfirmModalOpen.value = false
       pos.clearCart()
       showToast(`Tạo đơn ${order.orderCode} tiền mặt thành công!`)
       await loadData()
@@ -523,6 +551,7 @@ async function handleCheckout(method) {
         currentVietQr.value = qrRes.data
       }
 
+      isConfirmModalOpen.value = false
       isQrModalOpen.value = true
       pos.clearCart()
     }
