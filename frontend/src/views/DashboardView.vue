@@ -91,6 +91,71 @@
       </StatCard>
     </div>
 
+    <!-- THỐNG KÊ HÌNH THỨC THANH TOÁN (TIỀN MẶT & CHUYỂN KHOẢN) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Card Tiền Mặt -->
+      <div class="p-4 rounded-2xl bg-white border border-slate-200/90 hover:border-emerald-300 transition shadow-2xs space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shadow-2xs">
+              <Banknote class="w-5 h-5" />
+            </div>
+            <div>
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Tiền Mặt (Cash)</span>
+              <span class="text-xs text-emerald-600 font-semibold">Thu ngân & thanh toán tiền mặt</span>
+            </div>
+          </div>
+          <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+            {{ cashMonthRatio }}% tổng thu tháng
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 pt-2.5 border-t border-slate-100">
+          <div>
+            <span class="text-[11px] text-slate-400 block font-medium">Hôm nay</span>
+            <span class="text-xl font-black text-slate-900">{{ formatCurrency(summary.todayCash) }}</span>
+            <span class="text-[11px] text-slate-500 block mt-0.5">({{ cashTodayRatio }}% hôm nay)</span>
+          </div>
+          <div class="border-l border-slate-100 pl-3">
+            <span class="text-[11px] text-slate-400 block font-medium">{{ summary.selectedMonthName || 'Tháng này' }}</span>
+            <span class="text-xl font-black text-emerald-600">{{ formatCurrency(summary.monthCash) }}</span>
+            <span class="text-[11px] text-slate-500 block mt-0.5">Tổng tiền mặt tích lũy</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Chuyển Khoản / VietQR -->
+      <div class="p-4 rounded-2xl bg-white border border-slate-200/90 hover:border-blue-300 transition shadow-2xs space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shadow-2xs">
+              <QrCode class="w-5 h-5" />
+            </div>
+            <div>
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Tiền Chuyển Khoản (VietQR)</span>
+              <span class="text-xs text-blue-600 font-semibold">Quét mã QR NAPAS 247 & tài khoản</span>
+            </div>
+          </div>
+          <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+            {{ transferMonthRatio }}% tổng thu tháng
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 pt-2.5 border-t border-slate-100">
+          <div>
+            <span class="text-[11px] text-slate-400 block font-medium">Hôm nay</span>
+            <span class="text-xl font-black text-slate-900">{{ formatCurrency(summary.todayTransfer) }}</span>
+            <span class="text-[11px] text-slate-500 block mt-0.5">({{ transferTodayRatio }}% hôm nay)</span>
+          </div>
+          <div class="border-l border-slate-100 pl-3">
+            <span class="text-[11px] text-slate-400 block font-medium">{{ summary.selectedMonthName || 'Tháng này' }}</span>
+            <span class="text-xl font-black text-blue-600">{{ formatCurrency(summary.monthTransfer) }}</span>
+            <span class="text-[11px] text-slate-500 block mt-0.5">Tổng chuyển khoản tích lũy</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- KHỐI ĐỐI SOÁT & SO SÁNH THÁNG NÀY VS THÁNG TRƯỚC -->
     <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4">
       <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-slate-100 pb-3">
@@ -226,6 +291,39 @@
                 ></div>
               </div>
               <span class="text-[11px] text-slate-500 mt-1 block">{{ productRatio }}% tổng doanh thu</span>
+            </div>
+
+            <!-- Hình thức thanh toán trong tháng -->
+            <div class="pt-3 border-t border-slate-100 space-y-2.5">
+              <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Hình thức thanh toán</span>
+              
+              <!-- Tiền mặt -->
+              <div>
+                <div class="flex justify-between items-center text-xs mb-1">
+                  <span class="font-bold text-emerald-700 flex items-center gap-1">
+                    <Banknote class="w-3.5 h-3.5" /> Tiền Mặt
+                  </span>
+                  <span class="font-extrabold text-slate-900">{{ formatCurrency(summary.monthCash) }}</span>
+                </div>
+                <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                  <div class="bg-emerald-500 h-full rounded-full transition-all duration-500" :style="{ width: `${cashMonthRatio}%` }"></div>
+                </div>
+                <span class="text-[10px] text-slate-400 mt-0.5 block">{{ cashMonthRatio }}% doanh thu tháng</span>
+              </div>
+
+              <!-- Chuyển khoản -->
+              <div>
+                <div class="flex justify-between items-center text-xs mb-1">
+                  <span class="font-bold text-blue-700 flex items-center gap-1">
+                    <QrCode class="w-3.5 h-3.5" /> Chuyển Khoản
+                  </span>
+                  <span class="font-extrabold text-slate-900">{{ formatCurrency(summary.monthTransfer) }}</span>
+                </div>
+                <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                  <div class="bg-blue-600 h-full rounded-full transition-all duration-500" :style="{ width: `${transferMonthRatio}%` }"></div>
+                </div>
+                <span class="text-[10px] text-slate-400 mt-0.5 block">{{ transferMonthRatio }}% doanh thu tháng</span>
+              </div>
             </div>
           </div>
         </div>
@@ -391,6 +489,8 @@
             <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-bold text-[11px]">
               <th class="py-3 px-3">Ngày / Thứ</th>
               <th class="py-3 px-3 text-center">Lượt Khách</th>
+              <th class="py-3 px-3 text-right text-emerald-600">Tiền Mặt</th>
+              <th class="py-3 px-3 text-right text-blue-600">Chuyển Khoản</th>
               <th class="py-3 px-3 text-right">Dịch Vụ</th>
               <th class="py-3 px-3 text-right">Sản Phẩm</th>
               <th class="py-3 px-3 text-right">Giảm Giá</th>
@@ -402,7 +502,7 @@
           </thead>
           <tbody class="divide-y divide-slate-100 font-medium">
             <tr v-if="!filteredDailyList.length">
-              <td colspan="9" class="py-8 text-center text-slate-400">
+              <td colspan="11" class="py-8 text-center text-slate-400">
                 Không có ngày nào phát sinh doanh thu trong tháng này
               </td>
             </tr>
@@ -440,6 +540,20 @@
                 >
                   <Users class="w-3.5 h-3.5 text-slate-400" />
                   {{ day.ordersCount }}
+                </span>
+              </td>
+
+              <!-- Tiền Mặt -->
+              <td class="py-3.5 px-3 text-right">
+                <span :class="day.cashRevenue > 0 ? 'text-emerald-600 font-bold' : 'text-slate-400'">
+                  {{ day.cashRevenue > 0 ? formatCurrency(day.cashRevenue) : '-' }}
+                </span>
+              </td>
+
+              <!-- Chuyển Khoản -->
+              <td class="py-3.5 px-3 text-right">
+                <span :class="day.transferRevenue > 0 ? 'text-blue-600 font-bold' : 'text-slate-400'">
+                  {{ day.transferRevenue > 0 ? formatCurrency(day.transferRevenue) : '-' }}
                 </span>
               </td>
 
@@ -544,6 +658,16 @@
                 {{ formatCurrency(day.netProfit) }}
               </span>
             </div>
+          </div>
+
+          <!-- Chi tiết Tiền mặt & Chuyển khoản trong ngày -->
+          <div class="flex items-center gap-2 pt-1 text-[11px]">
+            <span class="text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-md font-medium">
+              TM: {{ formatCurrency(day.cashRevenue || 0) }}
+            </span>
+            <span class="text-blue-700 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md font-medium">
+              CK: {{ formatCurrency(day.transferRevenue || 0) }}
+            </span>
           </div>
 
           <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-200">
@@ -838,7 +962,9 @@ import {
   X,
   Wallet,
   BarChart3,
-  LineChart
+  LineChart,
+  Banknote,
+  QrCode
 } from 'lucide-vue-next'
 
 import {
@@ -870,6 +996,8 @@ const loadingDayDetail = ref(false)
 
 const summary = ref({
   todayRevenue: 0,
+  todayCash: 0,
+  todayTransfer: 0,
   todayOrdersCount: 0,
   todayDiscountTotal: 0,
   todayExpense: 0,
@@ -877,6 +1005,8 @@ const summary = ref({
   selectedMonthName: '',
   lastMonthName: '',
   monthRevenue: 0,
+  monthCash: 0,
+  monthTransfer: 0,
   monthOrdersCount: 0,
   monthExpense: 0,
   monthNetProfit: 0,
@@ -1023,16 +1153,48 @@ const productRatio = computed(() => {
   return Math.round((summary.value.productRevenueTotal / total) * 100)
 })
 
+const cashTodayRatio = computed(() => {
+  const total = (summary.value.todayCash || 0) + (summary.value.todayTransfer || 0)
+  if (total === 0) return 0
+  return Math.round(((summary.value.todayCash || 0) / total) * 100)
+})
+
+const transferTodayRatio = computed(() => {
+  const total = (summary.value.todayCash || 0) + (summary.value.todayTransfer || 0)
+  if (total === 0) return 0
+  return Math.round(((summary.value.todayTransfer || 0) / total) * 100)
+})
+
+const cashMonthRatio = computed(() => {
+  const total = (summary.value.monthCash || 0) + (summary.value.monthTransfer || 0)
+  if (total === 0) return 0
+  return Math.round(((summary.value.monthCash || 0) / total) * 100)
+})
+
+const transferMonthRatio = computed(() => {
+  const total = (summary.value.monthCash || 0) + (summary.value.monthTransfer || 0)
+  if (total === 0) return 0
+  return Math.round(((summary.value.monthTransfer || 0) / total) * 100)
+})
+
 const chartData = computed(() => {
   const days = summary.value.last7DaysSales || []
   return {
     labels: days.map(d => d.date),
     datasets: [
       {
-        label: 'Doanh thu (VNĐ)',
-        backgroundColor: '#4f46e5',
-        borderRadius: 8,
-        data: days.map(d => d.revenue)
+        label: 'Chuyển khoản (VNĐ)',
+        backgroundColor: '#3b82f6',
+        borderRadius: 6,
+        data: days.map(d => d.transfer || 0),
+        stack: 'combined'
+      },
+      {
+        label: 'Tiền mặt (VNĐ)',
+        backgroundColor: '#10b981',
+        borderRadius: 6,
+        data: days.map(d => d.cash || 0),
+        stack: 'combined'
       }
     ]
   }
@@ -1042,7 +1204,17 @@ const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
-    legend: { display: false },
+    legend: {
+      display: true,
+      position: 'top',
+      align: 'end',
+      labels: {
+        boxWidth: 10,
+        boxHeight: 10,
+        usePointStyle: true,
+        font: { size: 11, weight: '600' }
+      }
+    },
     tooltip: {
       backgroundColor: '#0f172a',
       titleColor: '#ffffff',
@@ -1050,21 +1222,23 @@ const chartOptions = {
       padding: 10,
       cornerRadius: 8,
       callbacks: {
-        label: (ctx) => ` Doanh thu: ${new Intl.NumberFormat('vi-VN').format(ctx.raw)} đ`
+        label: (ctx) => ` ${ctx.dataset.label}: ${new Intl.NumberFormat('vi-VN').format(ctx.raw)} đ`
       }
     }
   },
   scales: {
     x: {
+      stacked: true,
       grid: { display: false },
       ticks: { color: '#64748b', font: { size: 11, weight: '600' } }
     },
     y: {
+      stacked: true,
       grid: { color: '#f1f5f9' },
       ticks: {
         color: '#64748b',
         font: { size: 10 },
-        callback: (value) => `${value / 1000}k`
+        callback: (val) => val >= 1000000 ? `${val / 1000000}M` : (val >= 1000 ? `${val / 1000}k` : val)
       }
     }
   }

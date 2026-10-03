@@ -3,7 +3,7 @@
 # ==============================================================================
 
 $ErrorActionPreference = "Stop"
-$root = "d:\Project\pos\PosSytem"
+$root = if ($PSScriptRoot) { $PSScriptRoot } else { "d:\Pos\PosSytem" }
 $frontendDir = Join-Path $root "frontend"
 $backendDir = Join-Path $root "backend\DiroPos.Api"
 $wwwrootDir = Join-Path $backendDir "wwwroot"
@@ -65,7 +65,7 @@ Write-Host ""
 Write-Host "[3/4] Bien dich Backend .NET 10 thanh 1 file EXE doc lap (win-x64)..." -ForegroundColor Cyan
 Push-Location $backendDir
 try {
-    dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:EnableCompressionInSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true -o $publishDir
+    dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:EnableCompressionInSingleFile=false -o $publishDir
     if ($LASTEXITCODE -ne 0) { throw "Loi publish backend .NET!" }
 }
 finally {

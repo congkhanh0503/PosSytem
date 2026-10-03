@@ -1,4 +1,4 @@
-﻿using DiroPos.Api.Data;
+using DiroPos.Api.Data;
 using DiroPos.Api.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -45,6 +45,8 @@ public class DashboardController : ControllerBase
             .ToListAsync();
 
         decimal todayRevenue = todayOrders.Sum(o => o.FinalAmount);
+        decimal todayCash = todayOrders.Where(o => o.PaymentMethod == "Cash").Sum(o => o.FinalAmount);
+        decimal todayTransfer = todayOrders.Where(o => o.PaymentMethod != "Cash").Sum(o => o.FinalAmount);
         int todayOrdersCount = todayOrders.Count;
         decimal todayDiscountTotal = todayOrders.Sum(o => o.DiscountAmount);
 
@@ -54,6 +56,8 @@ public class DashboardController : ControllerBase
             .ToListAsync();
 
         decimal monthRevenue = monthOrders.Sum(o => o.FinalAmount);
+        decimal monthCash = monthOrders.Where(o => o.PaymentMethod == "Cash").Sum(o => o.FinalAmount);
+        decimal monthTransfer = monthOrders.Where(o => o.PaymentMethod != "Cash").Sum(o => o.FinalAmount);
         int monthOrdersCount = monthOrders.Count;
 
         // 3. Thống kê Tháng trước (Last Month)
@@ -124,6 +128,8 @@ public class DashboardController : ControllerBase
             {
                 Date = targetDay.ToString("dd/MM"),
                 Revenue = dayOrders.Sum(o => o.FinalAmount),
+                Cash = dayOrders.Where(o => o.PaymentMethod == "Cash").Sum(o => o.FinalAmount),
+                Transfer = dayOrders.Where(o => o.PaymentMethod != "Cash").Sum(o => o.FinalAmount),
                 OrdersCount = dayOrders.Count
             });
         }
@@ -174,6 +180,8 @@ public class DashboardController : ControllerBase
                 .ToList();
 
             decimal dayRev = dayOrders.Sum(o => o.FinalAmount);
+            decimal dayCash = dayOrders.Where(o => o.PaymentMethod == "Cash").Sum(o => o.FinalAmount);
+            decimal dayTransfer = dayOrders.Where(o => o.PaymentMethod != "Cash").Sum(o => o.FinalAmount);
             decimal dayExp = dayExpenses.Sum(e => e.Amount);
             decimal dayDisc = dayOrders.Sum(o => o.DiscountAmount);
 
@@ -200,6 +208,8 @@ public class DashboardController : ControllerBase
                 DayOfWeek = dayOfWeekVi,
                 IsToday = (d == now.Date),
                 OrdersCount = dayOrders.Count,
+                CashRevenue = dayCash,
+                TransferRevenue = dayTransfer,
                 ServiceRevenue = daySvc,
                 ProductRevenue = dayProd,
                 DiscountTotal = dayDisc,
@@ -247,6 +257,8 @@ public class DashboardController : ControllerBase
         return Ok(new DashboardSummaryDto
         {
             TodayRevenue = todayRevenue,
+            TodayCash = todayCash,
+            TodayTransfer = todayTransfer,
             TodayOrdersCount = todayOrdersCount,
             TodayDiscountTotal = todayDiscountTotal,
             TodayExpense = todayExpenseTotal,
@@ -254,6 +266,8 @@ public class DashboardController : ControllerBase
             SelectedMonthName = $"Tháng {selectedMonth:D2}/{selectedYear}",
             LastMonthName = $"Tháng {lastMonthStart.Month:D2}/{lastMonthStart.Year}",
             MonthRevenue = monthRevenue,
+            MonthCash = monthCash,
+            MonthTransfer = monthTransfer,
             MonthOrdersCount = monthOrdersCount,
             MonthExpense = monthExpenseTotal,
             MonthNetProfit = monthNetProfit,

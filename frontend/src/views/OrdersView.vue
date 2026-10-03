@@ -1,9 +1,20 @@
 <template>
   <div class="p-6 space-y-6 overflow-y-auto h-screen max-w-7xl mx-auto bg-slate-50 text-slate-800">
     <!-- Header -->
-    <div class="border-b border-slate-200 pb-4">
-      <h2 class="text-2xl font-black text-slate-900 tracking-tight">Lịch Sử Đơn Hàng Điện Tử</h2>
-      <p class="text-xs text-slate-500 mt-0.5 font-medium">Quản lý giao dịch, sửa thông tin, hủy đơn và đối soát doanh thu theo khoảng thời gian (Hệ thống lưu vết minh bạch chống gian lận)</p>
+    <div class="border-b border-slate-200 pb-4 flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <h2 class="text-2xl font-black text-slate-900 tracking-tight">Lịch Sử Đơn Hàng Điện Tử</h2>
+        <p class="text-xs text-slate-500 mt-0.5 font-medium">Quản lý giao dịch, sửa thông tin, hủy đơn và đối soát doanh thu theo khoảng thời gian (Hệ thống lưu vết minh bạch chống gian lận)</p>
+      </div>
+
+      <button
+        @click="isShiftModalOpen = true"
+        class="py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs shadow-md shadow-emerald-600/25 transition flex items-center gap-2 cursor-pointer active:scale-95"
+        title="Chốt sổ cuối ca / cuối ngày và khóa an toàn toàn bộ đơn hàng của ngày"
+      >
+        <Lock class="w-4 h-4" />
+        <span>Chốt Sổ & Đóng Ca</span>
+      </button>
     </div>
 
     <!-- BỘ LỌC LỊCH THÔNG MINH (SMART DATE FILTER) -->
@@ -178,12 +189,22 @@
                 <span v-else class="text-slate-300">—</span>
               </td>
               <td class="py-3.5 px-4 cursor-pointer" @click="openDetail(order)">
-                <span 
-                  class="px-2 py-0.5 rounded-full font-bold text-[10px]"
-                  :class="order.paymentStatus === 'Completed' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'"
-                >
-                  {{ order.paymentStatus === 'Completed' ? 'Hoàn tất' : 'Đã hủy' }}
-                </span>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span 
+                    class="px-2 py-0.5 rounded-full font-bold text-[10px]"
+                    :class="order.paymentStatus === 'Completed' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'"
+                  >
+                    {{ order.paymentStatus === 'Completed' ? 'Hoàn tất' : 'Đã hủy' }}
+                  </span>
+                  <span
+                    v-if="order.isLocked"
+                    class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-300 flex items-center gap-0.5"
+                    title="Đơn hàng đã chốt sổ đóng ca - Dữ liệu đã khóa an toàn"
+                  >
+                    <Lock class="w-3 h-3 text-amber-600" />
+                    Chốt ca
+                  </span>
+                </div>
               </td>
               <td class="py-3.5 px-4 text-right space-x-1.5 whitespace-nowrap">
                 <button 
@@ -193,22 +214,36 @@
                 >
                   <Eye class="w-3.5 h-3.5" />
                 </button>
-                <button 
-                  v-if="order.paymentStatus === 'Completed'"
-                  @click.stop="openEditModal(order)"
-                  class="p-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition"
-                  title="Chỉnh sửa đơn"
-                >
-                  <Edit3 class="w-3.5 h-3.5" />
-                </button>
-                <button 
-                  v-if="order.paymentStatus === 'Completed'"
-                  @click.stop="handleCancelOrder(order)"
-                  class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition"
-                  title="Hủy đơn hàng (Hoàn tồn kho, không xóa vĩnh viễn)"
-                >
-                  <Ban class="w-3.5 h-3.5" />
-                </button>
+
+                <!-- Nếu đơn đã khóa sau đóng ca: Không cho sửa hay hủy, chỉ xem -->
+                <template v-if="order.isLocked">
+                  <span 
+                    class="inline-flex items-center justify-center p-1.5 rounded-lg bg-amber-50 text-amber-600 border border-amber-200 cursor-not-allowed"
+                    title="Đơn hàng đã được chốt sổ đóng ca: Không thể chỉnh sửa hoặc hủy"
+                  >
+                    <Lock class="w-3.5 h-3.5" />
+                  </span>
+                </template>
+
+                <!-- Nếu đơn chưa khóa và Hoàn tất: Cho phép Sửa và Hủy -->
+                <template v-else-if="order.paymentStatus === 'Completed'">
+                  <button 
+                    @click.stop="openEditModal(order)"
+                    class="p-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition"
+                    title="Chỉnh sửa đơn"
+                  >
+                    <Edit3 class="w-3.5 h-3.5" />
+                  </button>
+                  <button 
+                    @click.stop="handleCancelOrder(order)"
+                    class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition"
+                    title="Hủy đơn hàng (Hoàn tồn kho, không xóa vĩnh viễn)"
+                  >
+                    <Ban class="w-3.5 h-3.5" />
+                  </button>
+                </template>
+
+                <!-- Nếu đơn đã hủy -->
                 <span 
                   v-else
                   class="inline-block p-1.5 text-rose-300 cursor-not-allowed"
@@ -338,6 +373,13 @@
       </div>
     </div>
 
+    <!-- Modal Đóng Ca Cuối Ngày (Z-Report & Khóa Đơn Hàng) -->
+    <ShiftCloseModal
+      :is-open="isShiftModalOpen"
+      @close="isShiftModalOpen = false"
+      @completed="handleShiftClosed"
+    />
+
   </div>
 </template>
 
@@ -346,13 +388,20 @@ import { ref, computed, onMounted } from 'vue'
 import api from '@/services/api'
 import { useNotify } from '@/composables/useNotify'
 import OrderDetailModal from '@/components/OrderDetailModal.vue'
-import { Calendar, RotateCcw, Edit3, Ban, XCircle, Eye } from 'lucide-vue-next'
+import ShiftCloseModal from '@/components/ShiftCloseModal.vue'
+import { Calendar, RotateCcw, Edit3, Ban, XCircle, Eye, Lock } from 'lucide-vue-next'
 
 const { toast, confirm } = useNotify()
 
 const orders = ref([])
 const selectedOrder = ref(null)
 const isModalOpen = ref(false)
+const isShiftModalOpen = ref(false)
+
+async function handleShiftClosed() {
+  toast.success('Đã chốt sổ đóng ca thành công! Toàn bộ đơn hàng đã được khóa an toàn.')
+  await loadOrders()
+}
 
 const isEditModalOpen = ref(null)
 const editingOrder = ref(null)
@@ -487,6 +536,10 @@ function openDetail(order) {
 }
 
 function openEditModal(order) {
+  if (order?.isLocked) {
+    toast.error('Đơn hàng này đã được chốt sổ đóng ca. Dữ liệu đã khóa an toàn, chỉ có thể xem!', 'Đơn Hàng Đã Khóa')
+    return
+  }
   editingOrder.value = order
   editForm.value = {
     customerName: order.customerName || '',
@@ -512,13 +565,19 @@ async function saveEditOrder() {
     toast.success('Cập nhật đơn hàng thành công!')
     loadOrders()
   } catch (err) {
-    toast.error('Không thể lưu cập nhật đơn hàng: ' + (err.response?.data || err.message))
+    toast.error('Không thể lưu cập nhật đơn hàng: ' + (err.response?.data?.message || err.response?.data || err.message))
   }
 }
 
 async function handleCancelOrder(orderOrId) {
   const targetId = typeof orderOrId === 'object' ? orderOrId.id : orderOrId
   const currentOrder = typeof orderOrId === 'object' ? orderOrId : orders.value.find(o => o.id === targetId)
+
+  if (currentOrder?.isLocked) {
+    toast.error('Đơn hàng này đã được chốt sổ đóng ca. Dữ liệu tài chính đã khóa an toàn, không thể hủy!', 'Không Thể Hủy')
+    return
+  }
+
   const code = currentOrder ? currentOrder.orderCode : ''
 
   const confirmed = await confirm({
@@ -539,7 +598,7 @@ async function handleCancelOrder(orderOrId) {
     await loadOrders()
     toast.success(`Đã hủy thành công đơn hàng [${code}]. Đơn hàng đã chuyển sang trạng thái ĐÃ HỦY.`)
   } catch (err) {
-    toast.error('Không thể hủy đơn: ' + (err.response?.data || err.message))
+    toast.error('Không thể hủy đơn: ' + (err.response?.data?.message || err.response?.data || err.message))
   }
 }
 

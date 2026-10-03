@@ -53,6 +53,7 @@ export const api = {
   updateOrder: (id, orderData) => apiClient.put(`/orders/${id}`, orderData),
   deleteOrder: (id) => apiClient.delete(`/orders/${id}`),
   cancelOrder: (id, data) => apiClient.post(`/orders/${id}/cancel`, data),
+  closeShift: () => apiClient.post('/orders/close-shift'),
 
   // Service Categories
   getServiceCategories: () => apiClient.get('/servicecategories'),
@@ -105,7 +106,8 @@ export const api = {
 
   // Hệ Thống & Phiên Bản (Version Management)
   getSystemVersion: () => apiClient.get('/system/version'),
-  checkUpdate: () => apiClient.get('/system/check-update')
+  checkUpdate: () => apiClient.get('/system/check-update'),
+  shutdownSystem: () => apiClient.post('/system/shutdown')
 }
 
 export default api

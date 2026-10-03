@@ -1,4 +1,4 @@
-﻿using DiroPos.Api.Data;
+using DiroPos.Api.Data;
 using DiroPos.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +24,7 @@ public class ExpensesController : ControllerBase
         [FromQuery] int? month = null,
         [FromQuery] int? year = null,
         [FromQuery] string? category = null,
+        [FromQuery] string? paymentMethod = null,
         [FromQuery] int limit = 200)
     {
         var query = _context.Expenses.AsQueryable();
@@ -62,6 +63,11 @@ public class ExpensesController : ControllerBase
             query = query.Where(e => e.Category.ToLower() == category.ToLower());
         }
 
+        if (!string.IsNullOrWhiteSpace(paymentMethod))
+        {
+            query = query.Where(e => e.PaymentMethod.ToLower() == paymentMethod.ToLower());
+        }
+
         return await query.OrderByDescending(e => e.Date).Take(limit).ToListAsync();
     }
 
@@ -84,6 +90,11 @@ public class ExpensesController : ControllerBase
         if (expense.Date == default)
         {
             expense.Date = DateTime.UtcNow.AddHours(7);
+        }
+
+        if (string.IsNullOrWhiteSpace(expense.PaymentMethod))
+        {
+            expense.PaymentMethod = "Cash";
         }
 
         expense.CreatedAt = DateTime.UtcNow.AddHours(7);

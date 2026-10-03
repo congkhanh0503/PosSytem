@@ -54,6 +54,8 @@ public class DailySalesDto
 {
     public string Date { get; set; } = string.Empty; // "22/09"
     public decimal Revenue { get; set; }
+    public decimal Cash { get; set; }
+    public decimal Transfer { get; set; }
     public int OrdersCount { get; set; }
 }
 
@@ -73,12 +75,16 @@ public class ExpenseCategoryDto
 public class DashboardSummaryDto
 {
     public decimal TodayRevenue { get; set; }
+    public decimal TodayCash { get; set; }
+    public decimal TodayTransfer { get; set; }
     public int TodayOrdersCount { get; set; }
     public decimal TodayDiscountTotal { get; set; }
     public decimal TodayExpense { get; set; }
     public decimal TodayNetProfit { get; set; }
 
     public decimal MonthRevenue { get; set; }
+    public decimal MonthCash { get; set; }
+    public decimal MonthTransfer { get; set; }
     public int MonthOrdersCount { get; set; }
     public decimal MonthExpense { get; set; }
     public decimal MonthNetProfit { get; set; }
@@ -124,6 +130,8 @@ public class DailyReportItemDto
     public string DayOfWeek { get; set; } = string.Empty; // "Thứ Tư"
     public bool IsToday { get; set; }
     public int OrdersCount { get; set; }
+    public decimal CashRevenue { get; set; }
+    public decimal TransferRevenue { get; set; }
     public decimal ServiceRevenue { get; set; }
     public decimal ProductRevenue { get; set; }
     public decimal DiscountTotal { get; set; }

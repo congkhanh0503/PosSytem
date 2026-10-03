@@ -1,4 +1,4 @@
-﻿namespace DiroPos.Api.Models;
+namespace DiroPos.Api.Models;
 
 public class ServiceItem
 {
@@ -57,6 +57,8 @@ public class Order
     public string PaymentMethod { get; set; } = "VietQR"; // "VietQR" | "Cash"
     public string PaymentStatus { get; set; } = "Completed"; // "Completed" | "Cancelled"
     public string? Note { get; set; } // Ghi chú đơn hàng
+    public bool IsLocked { get; set; } = false; // Đã chốt ca khóa an toàn, không sửa / hủy
+    public DateTime? ShiftClosedAt { get; set; } // Thời điểm bấm đóng ca chốt sổ
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public List<OrderItem> Items { get; set; } = new();
@@ -99,6 +101,7 @@ public class Expense
     public string Title { get; set; } = string.Empty; // VD: Tiền điện nước, Mua khăn giấy & dao cạo, Ăn trưa...
     public decimal Amount { get; set; }
     public string Category { get; set; } = "Phụ liệu & Hóa chất"; // "Mặt bằng & Tiện ích", "Phụ liệu & Hóa chất", "Dụng cụ & Máy móc", "Sinh hoạt & Ăn uống", "Khác"
+    public string PaymentMethod { get; set; } = "Cash"; // "Cash" (Tiền mặt) | "Transfer" (Chuyển khoản)
     public DateTime Date { get; set; } = DateTime.UtcNow;
     public string? Note { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

@@ -104,6 +104,13 @@ app.UseCors("AllowAll");
 app.UseAuthorization();
 app.MapControllers();
 
+// Endpoint đóng ứng dụng DiroPos an toàn từ giao diện khi cần
+app.MapPost("/api/system/shutdown", (IHostApplicationLifetime lifetime) =>
+{
+    Task.Delay(500).ContinueWith(_ => lifetime.StopApplication());
+    return Results.Ok(new { message = "Ứng dụng DiroPos đang đóng an toàn..." });
+});
+
 // SPA fallback cho Vue Router
 app.MapFallbackToFile("index.html");
 

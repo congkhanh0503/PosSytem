@@ -12,9 +12,18 @@
       <!-- Header -->
       <div class="border-b border-slate-100 pb-4 mb-4">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-indigo-50 text-indigo-600 border border-indigo-200">
-            {{ order.orderCode }}
-          </span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-indigo-50 text-indigo-600 border border-indigo-200">
+              {{ order.orderCode }}
+            </span>
+            <span 
+              v-if="order.isLocked"
+              class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1"
+              title="Đơn hàng đã được chốt sổ đóng ca, không thể chỉnh sửa hoặc hủy"
+            >
+              🔒 Đã chốt ca
+            </span>
+          </div>
           <span 
             class="text-xs font-semibold px-2.5 py-1 rounded-full"
             :class="order.paymentStatus === 'Completed' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'"
@@ -24,6 +33,15 @@
         </div>
         <h3 class="text-lg font-bold text-slate-900 mt-2">Chi Tiết Hóa Đơn Điện Tử</h3>
         <p class="text-xs text-slate-500">{{ formatDate(order.createdAt) }} • Hình thức: {{ order.paymentMethod }}</p>
+      </div>
+
+      <!-- Locked Alert Banner -->
+      <div v-if="order.isLocked" class="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-start gap-2">
+        <span class="text-base">🔒</span>
+        <div>
+          <p class="font-bold">Đơn hàng này đã được CHỐT SỔ ĐÓNG CA</p>
+          <p class="text-[11px] text-amber-700 mt-0.5">Dữ liệu tài chính đã được khóa an toàn. Đơn hàng chỉ dùng để đối soát/xem lại, không thể chỉnh sửa hay hủy.</p>
+        </div>
       </div>
 
       <!-- Cancelled Alert Banner -->
@@ -87,22 +105,25 @@
       </div>
 
       <!-- Actions -->
-      <div class="mt-6 flex flex-wrap gap-2.5">
+      <div class="mt-6 flex flex-wrap items-center gap-2.5">
         <button
-          v-if="order.paymentStatus === 'Completed'"
+          v-if="order.paymentStatus === 'Completed' && !order.isLocked"
           @click="$emit('edit-order', order)"
           class="py-2 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 font-semibold text-xs transition flex items-center gap-1.5"
         >
           <span>✏️</span> Sửa Đơn
         </button>
         <button
-          v-if="order.paymentStatus === 'Completed'"
+          v-if="order.paymentStatus === 'Completed' && !order.isLocked"
           @click="$emit('cancel-order', order)"
           class="py-2 px-3.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-semibold text-xs transition flex items-center gap-1.5"
           title="Hủy đơn hàng và hoàn tồn kho"
         >
           <span>🚫</span> Hủy Đơn Hàng
         </button>
+        <span v-if="order.isLocked" class="text-xs text-slate-400 italic">
+          Đơn hàng chỉ xem (đã chốt ca)
+        </span>
         <button
           @click="$emit('close')"
           class="flex-1 py-2 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition text-center shadow-sm"

@@ -171,6 +171,33 @@ public class OrdersController : ControllerBase
         });
     }
 
+    [HttpPost("close-shift")]
+    public async Task<IActionResult> CloseShift()
+    {
+        var now = DateTime.UtcNow.AddHours(7);
+
+        // Khóa tất cả các đơn hàng chưa khóa tính từ trước tới thời điểm đóng ca
+        var pendingOrders = await _context.Orders
+            .Where(o => !o.IsLocked && o.CreatedAt <= now)
+            .ToListAsync();
+
+        foreach (var order in pendingOrders)
+        {
+            order.IsLocked = true;
+            order.ShiftClosedAt = now;
+        }
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            success = true,
+            message = $"Đã chốt sổ đóng ca thành công! Khóa an toàn {pendingOrders.Count} đơn hàng.",
+            lockedCount = pendingOrders.Count,
+            closedAt = now
+        });
+    }
+
     [HttpPost("{id}/cancel")]
     public async Task<IActionResult> CancelOrder(int id, [FromBody] CancelOrderRequestDto? dto = null)
     {
@@ -179,6 +206,10 @@ public class OrdersController : ControllerBase
             .FirstOrDefaultAsync(o => o.Id == id);
 
         if (order == null) return NotFound(new { message = "Không tìm thấy đơn hàng." });
+        if (order.IsLocked)
+        {
+            return BadRequest(new { message = "Đơn hàng này đã được CHỐT SỔ ĐÓNG CA. Không thể hủy đơn hàng!" });
+        }
         if (order.PaymentStatus == "Cancelled") return BadRequest(new { message = "Đơn hàng này đã ở trạng thái HỦY trước đó." });
 
         order.PaymentStatus = "Cancelled";
@@ -211,6 +242,10 @@ public class OrdersController : ControllerBase
             .FirstOrDefaultAsync(o => o.Id == id);
 
         if (order == null) return NotFound();
+        if (order.IsLocked)
+        {
+            return BadRequest(new { message = "Đơn hàng này đã được CHỐT SỔ ĐÓNG CA. Không thể chỉnh sửa đơn hàng!" });
+        }
 
         // Nếu chuyển từ Completed sang Cancelled -> hoàn lại kho sản phẩm
         if (order.PaymentStatus != "Cancelled" && dto.PaymentStatus == "Cancelled")

@@ -59,15 +59,25 @@
         </div>
       </div>
 
-      <!-- App Version Info -->
-      <div class="mt-2.5 px-3 py-1.5 rounded-lg bg-slate-100/80 flex items-center justify-between text-[11px] text-slate-500 font-medium">
-        <span class="flex items-center gap-1.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          DiroPos
-        </span>
-        <span class="font-bold text-slate-700 bg-white px-1.5 py-0.5 rounded border border-slate-200 text-[10px] tracking-tight">
-          v{{ appVersion }}
-        </span>
+      <!-- App Version Info & Shutdown Button -->
+      <div class="mt-2.5 flex items-center gap-1.5">
+        <div class="flex-1 px-3 py-1.5 rounded-lg bg-slate-100/80 flex items-center justify-between text-[11px] text-slate-500 font-medium">
+          <span class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            DiroPos
+          </span>
+          <span class="font-bold text-slate-700 bg-white px-1.5 py-0.5 rounded border border-slate-200 text-[10px] tracking-tight">
+            v{{ appVersion }}
+          </span>
+        </div>
+
+        <button
+          @click="handleShutdown"
+          class="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200/80 hover:border-rose-200 transition cursor-pointer"
+          title="Tắt ứng dụng DiroPos an toàn"
+        >
+          <Power class="w-4 h-4" />
+        </button>
       </div>
     </div>
   </aside>
@@ -76,6 +86,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import api from '@/services/api'
+import { useNotify } from '@/composables/useNotify'
 import { 
   Store, 
   LayoutDashboard, 
@@ -83,10 +94,34 @@ import {
   ReceiptText, 
   Settings, 
   Sparkles, 
-  WalletCards 
+  WalletCards,
+  Power
 } from 'lucide-vue-next'
 
+const { confirm, toast } = useNotify()
+
 const appVersion = ref('1.0.0')
+
+async function handleShutdown() {
+  const confirmed = await confirm({
+    title: 'Tắt Ứng Dụng DiroPos?',
+    message: 'Toàn bộ dữ liệu bán hàng đã được lưu an toàn. Bạn có chắc chắn muốn tắt máy chủ POS không?',
+    confirmText: 'Tắt POS',
+    cancelText: 'Hủy bỏ',
+    type: 'warning'
+  })
+  if (!confirmed) return
+
+  try {
+    await api.shutdownSystem()
+    toast.info('Đang tắt ứng dụng DiroPos...')
+    setTimeout(() => {
+      window.close()
+    }, 800)
+  } catch (err) {
+    toast.error('Lỗi khi tắt ứng dụng: ' + err.message)
+  }
+}
 
 onMounted(async () => {
   try {

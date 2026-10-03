@@ -91,7 +91,7 @@
                 <Wallet class="w-4 h-4 text-emerald-400" />
                 <span class="font-bold text-xs">TIỀN MẶT CẦN KIỂM ĐẾM TRONG KÉT</span>
               </div>
-              <span class="text-[11px] text-slate-400 font-mono">(Tiền mặt thu - Tiền mặt chi)</span>
+              <span class="text-[11px] text-slate-400 font-mono">(Tổng doanh thu - Tiền chi)</span>
             </div>
 
             <div class="flex items-baseline justify-between">
@@ -166,7 +166,7 @@
             </div>
 
             <p class="text-[11px] leading-relaxed text-emerald-700">
-              Hệ thống đã lưu lại toàn bộ số liệu kết ca. Bạn có thể in phiếu kết ca bên dưới để lưu vào sổ thu chi hoặc bàn giao cho chủ quán.
+              🔒 <b>Bảo vệ dữ liệu:</b> Toàn bộ đơn hàng trong ca đã được khóa an toàn (chỉ cho phép xem chi tiết, không thể chỉnh sửa hoặc hủy). Bạn có thể in phiếu kết ca bên dưới để lưu vào sổ thu chi hoặc bàn giao cho chủ quán.
             </p>
           </div>
 
@@ -337,9 +337,9 @@ const currentDateTimeStr = computed(() => {
 })
 
 const expectedDrawerCash = computed(() => {
-  const cashIn = summary.value.cashTotal || 0
-  const cashOut = summary.value.expense || 0
-  return Math.max(0, cashIn - cashOut)
+  const totalRevenue = summary.value.revenue || 0
+  const totalExpense = summary.value.expense || 0
+  return Math.max(0, totalRevenue - totalExpense)
 })
 
 function formatCurrency(val) {
@@ -391,7 +391,14 @@ async function executeShiftCloseAndBackup() {
     }
     localStorage.setItem('diropos_last_shift_close', now.toISOString())
 
-    // 2. Tự động nén và đồng bộ sao lưu lên Cloud Supabase (lưu tối đa 3 bản mới nhất)
+    // 2. Khóa an toàn toàn bộ đơn hàng của ngày hôm đó (không thể sửa hoặc hủy nữa)
+    try {
+      await api.closeShift()
+    } catch (lockErr) {
+      console.warn('Lỗi khi khóa đơn hàng đóng ca:', lockErr)
+    }
+
+    // 3. Tự động nén và đồng bộ sao lưu lên Cloud Supabase (lưu tối đa 3 bản mới nhất)
     try {
       const res = await api.uploadCloudBackup()
       if (res.data?.success) {

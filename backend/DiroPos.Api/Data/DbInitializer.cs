@@ -1,4 +1,4 @@
-﻿using DiroPos.Api.Models;
+using DiroPos.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DiroPos.Api.Data;
@@ -17,6 +17,7 @@ public static class DbInitializer
                 ""Title"" TEXT NOT NULL,
                 ""Amount"" TEXT NOT NULL,
                 ""Category"" TEXT NOT NULL,
+                ""PaymentMethod"" TEXT NOT NULL DEFAULT 'Cash',
                 ""Date"" TEXT NOT NULL,
                 ""Note"" TEXT NULL,
                 ""CreatedAt"" TEXT NOT NULL
@@ -112,6 +113,50 @@ public static class DbInitializer
             {
                 using var alterCmd = conn.CreateCommand();
                 alterCmd.CommandText = @"ALTER TABLE ""SystemLicenses"" ADD COLUMN ""Address"" TEXT NULL;";
+                alterCmd.ExecuteNonQuery();
+            }
+
+            // Kiểm tra các cột mới trong Orders để hỗ trợ khóa đơn hàng khi đóng ca
+            var orderCols = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            using (var cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = @"PRAGMA table_info(""Orders"");";
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    orderCols.Add(reader.GetString(1));
+                }
+            }
+
+            if (!orderCols.Contains("IsLocked"))
+            {
+                using var alterCmd = conn.CreateCommand();
+                alterCmd.CommandText = @"ALTER TABLE ""Orders"" ADD COLUMN ""IsLocked"" INTEGER NOT NULL DEFAULT 0;";
+                alterCmd.ExecuteNonQuery();
+            }
+            if (!orderCols.Contains("ShiftClosedAt"))
+            {
+                using var alterCmd = conn.CreateCommand();
+                alterCmd.CommandText = @"ALTER TABLE ""Orders"" ADD COLUMN ""ShiftClosedAt"" TEXT NULL;";
+                alterCmd.ExecuteNonQuery();
+            }
+
+            // Kiểm tra cột PaymentMethod trong bảng Expenses
+            var expCols = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            using (var cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = @"PRAGMA table_info(""Expenses"");";
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    expCols.Add(reader.GetString(1));
+                }
+            }
+
+            if (!expCols.Contains("PaymentMethod"))
+            {
+                using var alterCmd = conn.CreateCommand();
+                alterCmd.CommandText = @"ALTER TABLE ""Expenses"" ADD COLUMN ""PaymentMethod"" TEXT NOT NULL DEFAULT 'Cash';";
                 alterCmd.ExecuteNonQuery();
             }
 

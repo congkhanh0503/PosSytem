@@ -25,7 +25,11 @@
           </div>
         </div>
         <h3 class="text-xl font-black text-rose-600">{{ formatCurrency(todayTotal) }}</h3>
-        <p class="text-[11px] text-slate-400 mt-1">Các khoản chi phát sinh trong ngày</p>
+        <p class="text-[11px] text-slate-500 mt-1 flex items-center gap-2">
+          <span>💵 Tiền mặt: <b class="text-slate-800">{{ formatCurrency(todayCashTotal) }}</b></span>
+          <span>•</span>
+          <span>💳 CK: <b class="text-indigo-600">{{ formatCurrency(todayTransferTotal) }}</b></span>
+        </p>
       </div>
 
       <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs relative overflow-hidden">
@@ -36,7 +40,11 @@
           </div>
         </div>
         <h3 class="text-xl font-black text-purple-700">{{ formatCurrency(monthTotal) }}</h3>
-        <p class="text-[11px] text-slate-400 mt-1">Bao gồm điện nước, mặt bằng, vật tư</p>
+        <p class="text-[11px] text-slate-500 mt-1 flex items-center gap-2">
+          <span>💵 Tiền mặt: <b class="text-slate-800">{{ formatCurrency(monthCashTotal) }}</b></span>
+          <span>•</span>
+          <span>💳 CK: <b class="text-indigo-600">{{ formatCurrency(monthTransferTotal) }}</b></span>
+        </p>
       </div>
 
       <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs relative overflow-hidden">
@@ -47,8 +55,11 @@
           </div>
         </div>
         <h3 class="text-sm font-bold text-slate-900 truncate">{{ latestExpense?.title || 'Chưa có' }}</h3>
-        <p class="text-[11px] text-indigo-600 mt-1 font-bold">
-          {{ latestExpense ? formatCurrency(latestExpense.amount) : '0 ₫' }}
+        <p class="text-[11px] text-indigo-600 mt-1 font-bold flex items-center gap-1.5">
+          <span>{{ latestExpense ? formatCurrency(latestExpense.amount) : '0 ₫' }}</span>
+          <span v-if="latestExpense" class="text-[10px] px-1.5 py-0.5 rounded font-medium bg-slate-100 text-slate-600">
+            {{ latestExpense.paymentMethod === 'Transfer' ? '💳 CK' : '💵 Tiền mặt' }}
+          </span>
         </p>
       </div>
     </div>
@@ -71,6 +82,16 @@
         </div>
 
         <div class="flex items-center gap-2 text-xs">
+          <select
+            v-model="filters.paymentMethod"
+            @change="loadExpenses"
+            class="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-slate-800 focus:outline-none focus:border-indigo-500 shadow-2xs"
+          >
+            <option value="">Tất cả hình thức chi</option>
+            <option value="Cash">💵 Tiền mặt</option>
+            <option value="Transfer">💳 Chuyển khoản</option>
+          </select>
+
           <select
             v-model="filters.category"
             @change="loadExpenses"
@@ -122,6 +143,7 @@
             <tr>
               <th class="py-3.5 px-4">Tên Khoản Chi</th>
               <th class="py-3.5 px-4">Phân Loại</th>
+              <th class="py-3.5 px-4">Hình Thức</th>
               <th class="py-3.5 px-4">Số Tiền (VNĐ)</th>
               <th class="py-3.5 px-4">Ngày Chi</th>
               <th class="py-3.5 px-4">Ghi Chú</th>
@@ -130,7 +152,7 @@
           </thead>
           <tbody class="divide-y divide-slate-100 font-medium">
             <tr v-if="expenses.length === 0">
-              <td colspan="6" class="py-12 text-center text-slate-400">
+              <td colspan="7" class="py-12 text-center text-slate-400">
                 Không tìm thấy khoản chi tiêu nào
               </td>
             </tr>
@@ -145,6 +167,14 @@
                   :class="getCategoryBadgeClass(exp.category)"
                 >
                   {{ exp.category }}
+                </span>
+              </td>
+              <td class="py-3.5 px-4">
+                <span 
+                  class="px-2 py-0.5 rounded-full font-bold text-[10px] inline-flex items-center gap-1"
+                  :class="exp.paymentMethod === 'Transfer' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'"
+                >
+                  <span>{{ exp.paymentMethod === 'Transfer' ? '💳 Chuyển khoản' : '💵 Tiền mặt' }}</span>
                 </span>
               </td>
               <td class="py-3.5 px-4 font-black text-rose-600 text-sm">
@@ -243,6 +273,28 @@
           </div>
 
           <div>
+            <label class="block text-slate-600 mb-1 font-medium">Hình thức chi tiền *</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                @click="form.paymentMethod = 'Cash'"
+                class="py-2 px-3 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                :class="form.paymentMethod !== 'Transfer' ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-2xs ring-1 ring-emerald-400' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'"
+              >
+                <span>💵 Tiền mặt</span>
+              </button>
+              <button
+                type="button"
+                @click="form.paymentMethod = 'Transfer'"
+                class="py-2 px-3 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                :class="form.paymentMethod === 'Transfer' ? 'bg-indigo-50 border-indigo-500 text-indigo-700 shadow-2xs ring-1 ring-indigo-400' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'"
+              >
+                <span>💳 Chuyển khoản</span>
+              </button>
+            </div>
+          </div>
+
+          <div>
             <label class="block text-slate-600 mb-1 font-medium">Phân loại danh mục</label>
             <select
               v-model="form.category"
@@ -309,6 +361,7 @@ const selectedPreset = ref('today')
 const form = ref({
   title: '',
   amount: 50000,
+  paymentMethod: 'Cash',
   category: 'Vật tư & Hàng hóa',
   date: new Date().toISOString().split('T')[0],
   note: ''
@@ -328,7 +381,8 @@ const filters = ref({
   date: '',
   fromDate: '',
   toDate: '',
-  category: ''
+  category: '',
+  paymentMethod: ''
 })
 
 function getISODate(d) {
@@ -380,6 +434,7 @@ async function loadExpenses() {
     if (filters.value.fromDate) params.fromDate = filters.value.fromDate
     if (filters.value.toDate) params.toDate = filters.value.toDate
     if (filters.value.category) params.category = filters.value.category
+    if (filters.value.paymentMethod) params.paymentMethod = filters.value.paymentMethod
 
     const res = await api.getExpenses(params)
     expenses.value = res.data
@@ -409,10 +464,38 @@ const todayTotal = computed(() => {
     .reduce((sum, e) => sum + e.amount, 0)
 })
 
+const todayCashTotal = computed(() => {
+  const today = getISODate(new Date())
+  return expenses.value
+    .filter(e => e.date && e.date.startsWith(today) && (e.paymentMethod || 'Cash') === 'Cash')
+    .reduce((sum, e) => sum + e.amount, 0)
+})
+
+const todayTransferTotal = computed(() => {
+  const today = getISODate(new Date())
+  return expenses.value
+    .filter(e => e.date && e.date.startsWith(today) && e.paymentMethod === 'Transfer')
+    .reduce((sum, e) => sum + e.amount, 0)
+})
+
 const monthTotal = computed(() => {
   const currentMonth = getISODate(new Date()).substring(0, 7)
   return expenses.value
     .filter(e => e.date && e.date.startsWith(currentMonth))
+    .reduce((sum, e) => sum + e.amount, 0)
+})
+
+const monthCashTotal = computed(() => {
+  const currentMonth = getISODate(new Date()).substring(0, 7)
+  return expenses.value
+    .filter(e => e.date && e.date.startsWith(currentMonth) && (e.paymentMethod || 'Cash') === 'Cash')
+    .reduce((sum, e) => sum + e.amount, 0)
+})
+
+const monthTransferTotal = computed(() => {
+  const currentMonth = getISODate(new Date()).substring(0, 7)
+  return expenses.value
+    .filter(e => e.date && e.date.startsWith(currentMonth) && e.paymentMethod === 'Transfer')
     .reduce((sum, e) => sum + e.amount, 0)
 })
 
@@ -444,6 +527,7 @@ function getCategoryBadgeClass(cat) {
 
 function resetFilters() {
   filters.value.category = ''
+  filters.value.paymentMethod = ''
   applyPreset('today')
 }
 
@@ -453,6 +537,7 @@ function openModal(exp = null) {
     form.value = {
       title: exp.title,
       amount: exp.amount,
+      paymentMethod: exp.paymentMethod || 'Cash',
       category: exp.category,
       date: exp.date.split('T')[0],
       note: exp.note || ''
@@ -462,6 +547,7 @@ function openModal(exp = null) {
     form.value = {
       title: '',
       amount: 50000,
+      paymentMethod: 'Cash',
       category: categories.value[0] || 'Vật tư & Hàng hóa',
       date: getISODate(new Date()),
       note: ''
