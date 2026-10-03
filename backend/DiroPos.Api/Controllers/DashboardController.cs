@@ -317,6 +317,8 @@ public class DashboardController : ControllerBase
         decimal expense = expenses.Sum(e => e.Amount);
         decimal vietQr = orders.Where(o => o.PaymentMethod == "VietQR").Sum(o => o.FinalAmount);
         decimal cash = orders.Where(o => o.PaymentMethod == "Cash").Sum(o => o.FinalAmount);
+        decimal cashExpense = expenses.Where(e => (e.PaymentMethod ?? "Cash") == "Cash").Sum(e => e.Amount);
+        decimal transferExpense = expenses.Where(e => e.PaymentMethod == "Transfer").Sum(e => e.Amount);
 
         string dayOfWeekVi = start.DayOfWeek switch
         {
@@ -341,6 +343,8 @@ public class DashboardController : ControllerBase
             NetProfit = revenue - expense,
             VietQrTotal = vietQr,
             CashTotal = cash,
+            CashExpense = cashExpense,
+            TransferExpense = transferExpense,
             Orders = orders,
             Expenses = expenses
         });

@@ -91,13 +91,17 @@
                 <Wallet class="w-4 h-4 text-emerald-400" />
                 <span class="font-bold text-xs">TIỀN MẶT CẦN KIỂM ĐẾM TRONG KÉT</span>
               </div>
-              <span class="text-[11px] text-slate-400 font-mono">(Tổng doanh thu - Tiền chi)</span>
+              <span class="text-[11px] text-slate-400 font-mono">(tiền mặt thu - tiền mặt chi)</span>
             </div>
 
             <div class="flex items-baseline justify-between">
               <div>
                 <p class="text-[11px] text-slate-300">Số tiền mặt thực tế phải có trong ngăn kéo:</p>
-                <p class="text-[10px] text-slate-400 mt-0.5">Không bao gồm tiền lẻ đầu ca (nếu có)</p>
+                <p class="text-[10px] text-slate-400 mt-1 flex items-center gap-2 font-mono">
+                  <span>Tiền mặt thu: <b class="text-emerald-400">{{ formatCurrency(summary.cashTotal || 0) }}</b></span>
+                  <span>-</span>
+                  <span>Tiền mặt chi: <b class="text-rose-400">{{ formatCurrency(cashExpense) }}</b></span>
+                </p>
               </div>
               <div class="text-right">
                 <span class="text-2xl font-black text-emerald-400 tracking-tight">
@@ -336,10 +340,17 @@ const currentDateTimeStr = computed(() => {
   return `${hours}:${mins} - Ngày ${day}/${month}/${year}`
 })
 
+const cashExpense = computed(() => {
+  if (summary.value.cashExpense !== undefined) return summary.value.cashExpense
+  return (summary.value.expenses || [])
+    .filter(e => (e.paymentMethod || 'Cash') === 'Cash')
+    .reduce((sum, e) => sum + (e.amount || 0), 0)
+})
+
 const expectedDrawerCash = computed(() => {
-  const totalRevenue = summary.value.revenue || 0
-  const totalExpense = summary.value.expense || 0
-  return Math.max(0, totalRevenue - totalExpense)
+  const cashIn = summary.value.cashTotal || 0
+  const cashOut = cashExpense.value
+  return Math.max(0, cashIn - cashOut)
 })
 
 function formatCurrency(val) {

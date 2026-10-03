@@ -151,6 +151,8 @@ public class DayDetailDto
     public decimal NetProfit { get; set; }
     public decimal VietQrTotal { get; set; }
     public decimal CashTotal { get; set; }
+    public decimal CashExpense { get; set; }
+    public decimal TransferExpense { get; set; }
     public List<Order> Orders { get; set; } = new();
     public List<Expense> Expenses { get; set; } = new();
 }
