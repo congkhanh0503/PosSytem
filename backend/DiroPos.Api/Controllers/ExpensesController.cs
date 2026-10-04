@@ -147,4 +147,40 @@ public class ExpensesController : ControllerBase
         };
         return Ok(categories);
     }
+
+    [HttpGet("summary")]
+    public async Task<ActionResult> GetExpenseSummary()
+    {
+        var now = DateTime.UtcNow.AddHours(7);
+        var todayStart = now.Date;
+        var todayEnd = todayStart.AddDays(1);
+        var monthStart = new DateTime(now.Year, now.Month, 1);
+        var monthEnd = monthStart.AddMonths(1);
+
+        var monthExpenses = await _context.Expenses
+            .Where(e => e.Date >= monthStart && e.Date < monthEnd)
+            .ToListAsync();
+
+        var todayExpenses = monthExpenses
+            .Where(e => e.Date >= todayStart && e.Date < todayEnd)
+            .ToList();
+
+        var latestExpense = await _context.Expenses
+            .OrderByDescending(e => e.Date)
+            .ThenByDescending(e => e.Id)
+            .FirstOrDefaultAsync();
+
+        return Ok(new
+        {
+            TodayTotal = todayExpenses.Sum(e => e.Amount),
+            TodayCashTotal = todayExpenses.Where(e => (e.PaymentMethod ?? "Cash") == "Cash").Sum(e => e.Amount),
+            TodayTransferTotal = todayExpenses.Where(e => e.PaymentMethod == "Transfer").Sum(e => e.Amount),
+
+            MonthTotal = monthExpenses.Sum(e => e.Amount),
+            MonthCashTotal = monthExpenses.Where(e => (e.PaymentMethod ?? "Cash") == "Cash").Sum(e => e.Amount),
+            MonthTransferTotal = monthExpenses.Where(e => e.PaymentMethod == "Transfer").Sum(e => e.Amount),
+
+            LatestExpense = latestExpense
+        });
+    }
 }

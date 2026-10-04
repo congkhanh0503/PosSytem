@@ -81,6 +81,7 @@ export const api = {
 
   // Expenses (Quản lý chi tiêu)
   getExpenses: (params) => apiClient.get('/expenses', { params }),
+  getExpenseSummary: () => apiClient.get('/expenses/summary'),
   getExpense: (id) => apiClient.get(`/expenses/${id}`),
   createExpense: (data) => apiClient.post('/expenses', data),
   updateExpense: (id, data) => apiClient.put(`/expenses/${id}`, data),

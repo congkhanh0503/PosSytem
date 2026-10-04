@@ -24,11 +24,11 @@
             <ArrowDownRight class="w-4 h-4" />
           </div>
         </div>
-        <h3 class="text-xl font-black text-rose-600">{{ formatCurrency(todayTotal) }}</h3>
+        <h3 class="text-xl font-black text-rose-600">{{ formatCurrency(overview.todayTotal) }}</h3>
         <p class="text-[11px] text-slate-500 mt-1 flex items-center gap-2">
-          <span>💵 Tiền mặt: <b class="text-slate-800">{{ formatCurrency(todayCashTotal) }}</b></span>
+          <span>💵 Tiền mặt: <b class="text-slate-800">{{ formatCurrency(overview.todayCashTotal) }}</b></span>
           <span>•</span>
-          <span>💳 CK: <b class="text-indigo-600">{{ formatCurrency(todayTransferTotal) }}</b></span>
+          <span>💳 CK: <b class="text-indigo-600">{{ formatCurrency(overview.todayTransferTotal) }}</b></span>
         </p>
       </div>
 
@@ -39,11 +39,11 @@
             <Calendar class="w-4 h-4" />
           </div>
         </div>
-        <h3 class="text-xl font-black text-purple-700">{{ formatCurrency(monthTotal) }}</h3>
+        <h3 class="text-xl font-black text-purple-700">{{ formatCurrency(overview.monthTotal) }}</h3>
         <p class="text-[11px] text-slate-500 mt-1 flex items-center gap-2">
-          <span>💵 Tiền mặt: <b class="text-slate-800">{{ formatCurrency(monthCashTotal) }}</b></span>
+          <span>💵 Tiền mặt: <b class="text-slate-800">{{ formatCurrency(overview.monthCashTotal) }}</b></span>
           <span>•</span>
-          <span>💳 CK: <b class="text-indigo-600">{{ formatCurrency(monthTransferTotal) }}</b></span>
+          <span>💳 CK: <b class="text-indigo-600">{{ formatCurrency(overview.monthTransferTotal) }}</b></span>
         </p>
       </div>
 
@@ -54,11 +54,11 @@
             <Receipt class="w-4 h-4" />
           </div>
         </div>
-        <h3 class="text-sm font-bold text-slate-900 truncate">{{ latestExpense?.title || 'Chưa có' }}</h3>
+        <h3 class="text-sm font-bold text-slate-900 truncate">{{ overview.latestExpense?.title || 'Chưa có' }}</h3>
         <p class="text-[11px] text-indigo-600 mt-1 font-bold flex items-center gap-1.5">
-          <span>{{ latestExpense ? formatCurrency(latestExpense.amount) : '0 ₫' }}</span>
-          <span v-if="latestExpense" class="text-[10px] px-1.5 py-0.5 rounded font-medium bg-slate-100 text-slate-600">
-            {{ latestExpense.paymentMethod === 'Transfer' ? '💳 CK' : '💵 Tiền mặt' }}
+          <span>{{ overview.latestExpense ? formatCurrency(overview.latestExpense.amount) : '0 ₫' }}</span>
+          <span v-if="overview.latestExpense" class="text-[10px] px-1.5 py-0.5 rounded font-medium bg-slate-100 text-slate-600">
+            {{ overview.latestExpense.paymentMethod === 'Transfer' ? '💳 CK' : '💵 Tiền mặt' }}
           </span>
         </p>
       </div>
@@ -452,56 +452,39 @@ async function loadCategories() {
   }
 }
 
+const overview = ref({
+  todayTotal: 0,
+  todayCashTotal: 0,
+  todayTransferTotal: 0,
+  monthTotal: 0,
+  monthCashTotal: 0,
+  monthTransferTotal: 0,
+  latestExpense: null
+})
+
+async function loadSummary() {
+  try {
+    const res = await api.getExpenseSummary()
+    if (res?.data) {
+      overview.value = {
+        todayTotal: res.data.todayTotal || 0,
+        todayCashTotal: res.data.todayCashTotal || 0,
+        todayTransferTotal: res.data.todayTransferTotal || 0,
+        monthTotal: res.data.monthTotal || 0,
+        monthCashTotal: res.data.monthCashTotal || 0,
+        monthTransferTotal: res.data.monthTransferTotal || 0,
+        latestExpense: res.data.latestExpense || null
+      }
+    }
+  } catch (err) {
+    console.error('Lỗi khi tải tổng quan chi tiêu:', err)
+  }
+}
+
 onMounted(() => {
   applyPreset('today')
   loadCategories()
-})
-
-const todayTotal = computed(() => {
-  const today = getISODate(new Date())
-  return expenses.value
-    .filter(e => e.date && e.date.startsWith(today))
-    .reduce((sum, e) => sum + e.amount, 0)
-})
-
-const todayCashTotal = computed(() => {
-  const today = getISODate(new Date())
-  return expenses.value
-    .filter(e => e.date && e.date.startsWith(today) && (e.paymentMethod || 'Cash') === 'Cash')
-    .reduce((sum, e) => sum + e.amount, 0)
-})
-
-const todayTransferTotal = computed(() => {
-  const today = getISODate(new Date())
-  return expenses.value
-    .filter(e => e.date && e.date.startsWith(today) && e.paymentMethod === 'Transfer')
-    .reduce((sum, e) => sum + e.amount, 0)
-})
-
-const monthTotal = computed(() => {
-  const currentMonth = getISODate(new Date()).substring(0, 7)
-  return expenses.value
-    .filter(e => e.date && e.date.startsWith(currentMonth))
-    .reduce((sum, e) => sum + e.amount, 0)
-})
-
-const monthCashTotal = computed(() => {
-  const currentMonth = getISODate(new Date()).substring(0, 7)
-  return expenses.value
-    .filter(e => e.date && e.date.startsWith(currentMonth) && (e.paymentMethod || 'Cash') === 'Cash')
-    .reduce((sum, e) => sum + e.amount, 0)
-})
-
-const monthTransferTotal = computed(() => {
-  const currentMonth = getISODate(new Date()).substring(0, 7)
-  return expenses.value
-    .filter(e => e.date && e.date.startsWith(currentMonth) && e.paymentMethod === 'Transfer')
-    .reduce((sum, e) => sum + e.amount, 0)
-})
-
-const latestExpense = computed(() => {
-  if (expenses.value.length === 0) return null
-  return expenses.value[0]
+  loadSummary()
 })
 
 function formatCurrency(val) {
@@ -567,6 +550,7 @@ async function saveExpense() {
     }
     isModalOpen.value = false
     loadExpenses()
+    loadSummary()
   } catch (err) {
     toast.error('Lỗi lưu khoản chi: ' + err.message)
   }
@@ -586,6 +570,7 @@ async function deleteExpense(id) {
     await api.deleteExpense(id)
     toast.success('Đã xóa khoản chi thành công!')
     loadExpenses()
+    loadSummary()
   } catch (err) {
     toast.error('Không thể xóa: ' + err.message)
   }
