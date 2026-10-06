@@ -112,6 +112,7 @@
               v-for="(item, idx) in cart" 
               :key="idx"
               class="p-2.5 rounded-xl bg-white border border-slate-200/70 flex justify-between items-center gap-2"
+              :class="item.itemType === 'Product' && item.stockQuantity !== null && (item.stockQuantity <= 0 || item.quantity > item.stockQuantity) ? 'border-rose-300 bg-rose-50/50' : ''"
             >
               <div class="flex-1 overflow-hidden">
                 <div class="flex items-center gap-1.5">
@@ -123,8 +124,15 @@
                   </span>
                   <p class="font-bold text-slate-900 truncate">{{ item.itemName }}</p>
                 </div>
-                <div class="text-[11px] text-slate-500 mt-0.5">
-                  {{ formatCurrency(item.unitPrice) }} x {{ item.quantity }}
+                <div class="text-[11px] text-slate-500 mt-0.5 flex items-center gap-1.5">
+                  <span>{{ formatCurrency(item.unitPrice) }} x {{ item.quantity }}</span>
+                  <span 
+                    v-if="item.itemType === 'Product' && item.stockQuantity !== null && item.stockQuantity !== undefined"
+                    class="text-[10px] font-bold px-1.5 py-0.2 rounded"
+                    :class="item.stockQuantity <= 0 || item.quantity > item.stockQuantity ? 'bg-rose-100 text-rose-700 border border-rose-300' : 'bg-slate-100 text-slate-600 border border-slate-200'"
+                  >
+                    Kho: {{ item.stockQuantity }}
+                  </span>
                 </div>
               </div>
 
@@ -133,6 +141,12 @@
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- Banner cảnh báo nếu có lỗi tồn kho -->
+        <div v-if="hasStockError" class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 font-medium">
+          <span class="font-bold text-base">⚠️</span>
+          <span>Có sản phẩm vượt quá số lượng tồn kho. Vui lòng bấm Hủy Bỏ để điều chỉnh lại giỏ hàng!</span>
         </div>
 
         <!-- Total Calculation Breakdown -->
@@ -226,7 +240,7 @@
         <button
           type="button"
           @click="handleConfirm"
-          :disabled="isLoading || (selectedMethod === 'Cash' && cashChange < 0)"
+          :disabled="isLoading || (selectedMethod === 'Cash' && cashChange < 0) || hasStockError"
           class="py-3 px-4 rounded-2xl text-white font-extrabold text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           :class="selectedMethod === 'Cash' 
             ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-500/25' 
@@ -374,13 +388,22 @@ function formatQuickAmount(val) {
   return `${val / 1000}k`
 }
 
+const hasStockError = computed(() => {
+  return props.cart.some(item => 
+    item.itemType === 'Product' && 
+    item.stockQuantity !== null && 
+    item.stockQuantity !== undefined && 
+    (item.stockQuantity <= 0 || item.quantity > item.stockQuantity)
+  )
+})
+
 function handleClose() {
   if (props.isLoading) return
   emit('close')
 }
 
 function handleConfirm() {
-  if (props.isLoading) return
+  if (props.isLoading || hasStockError.value) return
   emit('confirm', selectedMethod.value)
 }
 </script>

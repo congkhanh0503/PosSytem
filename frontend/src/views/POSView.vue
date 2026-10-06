@@ -125,8 +125,13 @@
           <div
             v-for="prod in filteredProducts"
             :key="prod.id"
-            @click="pos.addItem(prod, 'Product')"
-            class="group bg-white hover:bg-slate-50/80 border border-slate-200 hover:border-indigo-300 rounded-2xl p-4 cursor-pointer transition-all duration-200 flex flex-col justify-between select-none active:scale-[0.98] shadow-2xs hover:shadow-md"
+            @click="handleAddProduct(prod)"
+            class="group rounded-2xl p-4 transition-all duration-200 flex flex-col justify-between select-none shadow-2xs"
+            :class="[
+              prod.stockQuantity <= 0 
+                ? 'opacity-60 bg-slate-100 border border-slate-200 cursor-not-allowed hover:shadow-none' 
+                : 'bg-white hover:bg-slate-50/80 border border-slate-200 hover:border-indigo-300 cursor-pointer active:scale-[0.98] hover:shadow-md'
+            ]"
           >
             <div>
               <div class="flex justify-between items-start gap-2 mb-2">
@@ -143,18 +148,28 @@
                 </span>
                 <span 
                   class="text-[11px] font-bold px-1.5 py-0.5 rounded"
-                  :class="prod.stockQuantity <= prod.lowStockAlert ? 'bg-rose-50 text-rose-600 border border-rose-200' : 'bg-emerald-50 text-emerald-600 border border-emerald-200'"
+                  :class="[
+                    prod.stockQuantity <= 0 
+                      ? 'bg-rose-100 text-rose-700 border border-rose-300 font-black' 
+                      : (prod.stockQuantity <= prod.lowStockAlert ? 'bg-amber-50 text-amber-600 border border-amber-200 font-bold' : 'bg-emerald-50 text-emerald-600 border border-emerald-200 font-bold')
+                  ]"
                 >
-                  Kho: {{ prod.stockQuantity }}
+                  {{ prod.stockQuantity <= 0 ? 'Hết hàng' : `Kho: ${prod.stockQuantity}` }}
                 </span>
               </div>
-              <h4 class="font-bold text-slate-900 text-sm group-hover:text-indigo-600 transition line-clamp-2">
+              <h4 
+                class="font-bold text-sm transition line-clamp-2"
+                :class="prod.stockQuantity <= 0 ? 'text-slate-400' : 'text-slate-900 group-hover:text-indigo-600'"
+              >
                 {{ prod.name }}
               </h4>
             </div>
 
             <div class="mt-4 pt-2.5 border-t border-slate-100 flex justify-between items-center">
-              <span class="text-sm font-extrabold text-indigo-600">
+              <span 
+                class="text-sm font-extrabold"
+                :class="prod.stockQuantity <= 0 ? 'text-slate-400' : 'text-indigo-600'"
+              >
                 {{ formatCurrency(prod.salePrice) }}
               </span>
               <div class="flex items-center gap-1.5">
@@ -164,7 +179,16 @@
                 >
                   x{{ getItemQuantity(prod.id, 'Product') }}
                 </span>
-                <span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white flex items-center justify-center font-bold text-sm transition shadow-2xs">
+                <span 
+                  v-if="prod.stockQuantity <= 0"
+                  class="px-2 py-1 rounded-lg bg-slate-200 text-slate-500 font-bold text-[10px] uppercase tracking-wider"
+                >
+                  Hết
+                </span>
+                <span 
+                  v-else
+                  class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white flex items-center justify-center font-bold text-sm transition shadow-2xs"
+                >
                   +
                 </span>
               </div>
@@ -243,6 +267,13 @@
               <span v-if="item.quantity > 1" class="text-slate-500 font-medium">
                 x {{ item.quantity }} = <span class="text-indigo-600 font-bold">{{ formatCurrency(item.unitPrice * item.quantity) }}</span>
               </span>
+              <span 
+                v-if="item.itemType === 'Product' && item.stockQuantity !== null && item.stockQuantity !== undefined"
+                class="text-[10px] font-semibold px-1.5 py-0.2 rounded"
+                :class="item.quantity >= item.stockQuantity ? 'bg-rose-50 text-rose-600 border border-rose-200 font-bold' : 'bg-slate-100 text-slate-500'"
+              >
+                Kho: {{ item.stockQuantity }}
+              </span>
             </div>
           </div>
 
@@ -250,17 +281,18 @@
           <div class="flex items-center gap-2">
             <div class="flex items-center bg-white rounded-lg p-0.5 border border-slate-200 shadow-2xs">
               <button 
-                @click="pos.updateQuantity(index, -1)" 
-                class="w-6 h-6 flex items-center justify-center text-slate-600 hover:text-slate-900 font-bold transition hover:bg-slate-100 rounded"
+                @click="handleUpdateCartQty(index, -1)" 
+                class="w-6 h-6 flex items-center justify-center text-slate-600 hover:text-slate-900 font-bold transition hover:bg-slate-100 rounded cursor-pointer"
                 title="Giảm 1"
               >
                 -
               </button>
               <span class="w-6 text-center font-bold text-slate-900">{{ item.quantity }}</span>
               <button 
-                @click="pos.updateQuantity(index, 1)" 
-                class="w-6 h-6 flex items-center justify-center text-slate-600 hover:text-slate-900 font-bold transition hover:bg-slate-100 rounded"
-                title="Tăng 1"
+                @click="handleUpdateCartQty(index, 1)" 
+                :disabled="item.itemType === 'Product' && item.stockQuantity !== null && item.stockQuantity !== undefined && item.quantity >= item.stockQuantity"
+                class="w-6 h-6 flex items-center justify-center text-slate-600 hover:text-slate-900 font-bold transition hover:bg-slate-100 rounded disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                :title="item.itemType === 'Product' && item.quantity >= item.stockQuantity ? 'Đã đạt giới hạn tồn kho' : 'Tăng 1'"
               >
                 +
               </button>
@@ -521,8 +553,55 @@ async function loadData() {
   }
 }
 
+function handleAddProduct(prod) {
+  if (prod.stockQuantity <= 0) {
+    notify.error(`Sản phẩm "${prod.name}" đã HẾT HÀNG trong kho (Tồn kho: 0)!`)
+    return
+  }
+
+  const currentInCart = getItemQuantity(prod.id, 'Product')
+  if (currentInCart >= prod.stockQuantity) {
+    notify.warning(`Sản phẩm "${prod.name}" chỉ còn ${prod.stockQuantity} trong kho! Không thể thêm nữa.`)
+    return
+  }
+
+  const res = pos.addItem(prod, 'Product')
+  if (res && !res.success) {
+    notify.warning(res.message)
+  }
+}
+
+function handleUpdateCartQty(index, delta) {
+  const item = pos.cart[index]
+  if (delta > 0 && item?.itemType === 'Product') {
+    if (item.stockQuantity !== null && item.stockQuantity !== undefined && item.quantity >= item.stockQuantity) {
+      notify.warning(`Sản phẩm "${item.itemName}" chỉ còn ${item.stockQuantity} trong kho! Không thể tăng thêm.`)
+      return
+    }
+  }
+  const res = pos.updateQuantity(index, delta)
+  if (res && !res.success) {
+    notify.warning(res.message)
+  }
+}
+
 function openConfirmModal(method) {
   if (pos.cart.length === 0 || pos.isLoading) return
+
+  // Kiểm tra tồn kho trước khi mở modal xác nhận
+  for (const item of pos.cart) {
+    if (item.itemType === 'Product' && item.stockQuantity !== null && item.stockQuantity !== undefined) {
+      if (item.stockQuantity <= 0) {
+        notify.error(`Sản phẩm "${item.itemName}" đã HẾT HÀNG trong kho. Vui lòng xóa khỏi giỏ!`)
+        return
+      }
+      if (item.quantity > item.stockQuantity) {
+        notify.warning(`Sản phẩm "${item.itemName}" vượt quá tồn kho (Còn ${item.stockQuantity}, bạn đang bán ${item.quantity}).`)
+        return
+      }
+    }
+  }
+
   confirmMethod.value = method || 'Cash'
   isConfirmModalOpen.value = true
 }

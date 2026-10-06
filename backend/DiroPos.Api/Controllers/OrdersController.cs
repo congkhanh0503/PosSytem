@@ -97,13 +97,50 @@ public class OrdersController : ControllerBase
             return BadRequest("Đơn hàng phải có ít nhất 1 dịch vụ hoặc sản phẩm.");
         }
 
-        // 1. Tạo mã đơn hàng duy nhất trong ngày theo giờ Việt Nam (UTC+7)
+        // 1. Kiểm tra tồn kho nghiêm ngặt: Tuyệt đối không cho phép bán sản phẩm đã hết hàng hoặc bán vượt số lượng tồn kho
+        var productItems = dto.Items.Where(i => i.ItemType == "Product").ToList();
+        if (productItems.Any())
+        {
+            var productIds = productItems.Select(i => i.ItemId).Distinct().ToList();
+            var productsInDb = await _context.Products
+                .Where(p => productIds.Contains(p.Id))
+                .ToDictionaryAsync(p => p.Id);
+
+            foreach (var item in productItems)
+            {
+                if (!productsInDb.TryGetValue(item.ItemId, out var product))
+                {
+                    return BadRequest(new { message = $"Sản phẩm '{item.ItemName}' không tồn tại trên hệ thống." });
+                }
+
+                if (item.Quantity <= 0)
+                {
+                    return BadRequest(new { message = $"Số lượng sản phẩm '{product.Name}' phải lớn hơn 0." });
+                }
+
+                if (product.StockQuantity <= 0)
+                {
+                    return BadRequest(new { 
+                        message = $"Sản phẩm '{product.Name}' đã HẾT HÀNG trong kho (Tồn kho: 0). Không thể thanh toán!" 
+                    });
+                }
+
+                if (product.StockQuantity < item.Quantity)
+                {
+                    return BadRequest(new { 
+                        message = $"Sản phẩm '{product.Name}' không đủ tồn kho (Trong kho còn: {product.StockQuantity}, bạn đang bán: {item.Quantity}). Vui lòng giảm số lượng!" 
+                    });
+                }
+            }
+        }
+
+        // 2. Tạo mã đơn hàng duy nhất trong ngày theo giờ Việt Nam (UTC+7)
         var today = DateTime.UtcNow.AddHours(7);
         var todayStart = today.Date;
         var todayOrdersCount = await _context.Orders.CountAsync(o => o.CreatedAt >= todayStart);
         string orderCode = $"CB-{today:yyMMdd}-{(todayOrdersCount + 1):D3}";
 
-        // 2. Tính tiền và xử lý tồn kho
+        // 3. Tính tiền và trừ tồn kho chính xác
         decimal subTotal = 0;
         var orderItems = new List<OrderItem>();
 
@@ -117,7 +154,7 @@ public class OrdersController : ControllerBase
                 var product = await _context.Products.FindAsync(item.ItemId);
                 if (product != null)
                 {
-                    product.StockQuantity = Math.Max(0, product.StockQuantity - item.Quantity);
+                    product.StockQuantity -= item.Quantity;
                 }
             }
 
@@ -259,7 +296,7 @@ public class OrdersController : ControllerBase
                 }
             }
         }
-        // Nếu chuyển từ Cancelled sang Completed -> trừ lại kho
+        // Nếu chuyển từ Cancelled sang Completed -> trừ lại kho nếu đủ số lượng
         else if (order.PaymentStatus == "Cancelled" && dto.PaymentStatus == "Completed")
         {
             foreach (var item in order.Items.Where(i => i.ItemType == "Product" && i.ProductId.HasValue))
@@ -267,7 +304,13 @@ public class OrdersController : ControllerBase
                 var product = await _context.Products.FindAsync(item.ProductId!.Value);
                 if (product != null)
                 {
-                    product.StockQuantity = Math.Max(0, product.StockQuantity - item.Quantity);
+                    if (product.StockQuantity < item.Quantity)
+                    {
+                        return BadRequest(new { 
+                            message = $"Sản phẩm '{product.Name}' không đủ tồn kho để khôi phục đơn hàng (Trong kho còn: {product.StockQuantity}, đơn yêu cầu: {item.Quantity})." 
+                        });
+                    }
+                    product.StockQuantity -= item.Quantity;
                 }
             }
         }
