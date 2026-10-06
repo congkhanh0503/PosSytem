@@ -2,8 +2,8 @@
   <div class="p-6 space-y-6 overflow-y-auto h-screen max-w-5xl mx-auto bg-slate-50 text-slate-800">
     <!-- Header -->
     <div class="border-b border-slate-200 pb-4">
-      <h2 class="text-2xl font-black text-slate-900 tracking-tight">Cài Đặt Hệ Thống & VietQR</h2>
-      <p class="text-xs text-slate-500 mt-0.5 font-medium">Thiết lập tài khoản nhận tiền ngân hàng, thông tin thương hiệu và an toàn dữ liệu</p>
+      <h2 class="text-2xl font-black text-slate-900 tracking-tight">Cài Đặt Hệ Thống & Đóng Ca</h2>
+      <p class="text-xs text-slate-500 mt-0.5 font-medium">Thiết lập tài khoản nhận tiền VietQR, thông tin cửa hàng và chốt ca làm việc</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -144,7 +144,7 @@
 
         </form>
 
-        <!-- Card 3: Đóng Ca Cuối Ngày & Dữ Liệu Đám Mây (Z-Report & Cloud Backup) -->
+        <!-- Card 3: Đóng Ca Cuối Ngày & Chốt Sổ (Z-Report) -->
         <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
           <!-- Header Card 3 -->
           <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -153,18 +153,18 @@
                 <Moon class="w-4 h-4" />
               </div>
               <div>
-                <h3 class="font-bold text-slate-900 text-sm">Đóng Ca Cuối Ngày & Dữ Liệu Đám Mây</h3>
-                <p class="text-[11px] text-slate-500 font-medium">Chốt ca làm việc, đối soát két tiền và tự động bảo vệ dữ liệu trên Cloud</p>
+                <h3 class="font-bold text-slate-900 text-sm">Đóng Ca Cuối Ngày (Z-Report)</h3>
+                <p class="text-[11px] text-slate-500 font-medium">Chốt ca làm việc, đối soát két tiền mặt và bàn giao ca an toàn</p>
               </div>
             </div>
 
             <button
               type="button"
-              @click="loadBackupInfo(); loadCloudBackups();"
+              @click="loadBackupInfo"
               title="Làm mới trạng thái dữ liệu"
               class="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition cursor-pointer"
             >
-              <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': loadingBackupInfo || loadingCloudBackups }" />
+              <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': loadingBackupInfo }" />
             </button>
           </div>
 
@@ -174,14 +174,14 @@
               <div class="flex items-center gap-2">
                 <span class="font-bold text-slate-900 text-xs flex items-center gap-1.5">
                   <Moon class="w-3.5 h-3.5 text-indigo-600" />
-                  <span>Chốt Sổ Ca & Bàn Giao (Z-Report)</span>
+                  <span>Chốt Sổ Ca & Bàn Giao Két Tiền</span>
                 </span>
                 <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-100 text-emerald-700 border border-emerald-200/60">
-                  TỰ ĐỘNG ĐỒNG BỘ CLOUD
+                  TỰ ĐỘNG KHÓA ĐƠN & LƯU TRỮ
                 </span>
               </div>
               <p class="text-[11px] text-slate-500 leading-relaxed max-w-md">
-                Tổng hợp tiền mặt trong két, doanh thu VietQR và tự động lưu bản sao lưu nén an toàn lên Cloud.
+                Tổng hợp tiền mặt trong két, doanh thu VietQR và tự động khóa an toàn các đơn hàng đã phục vụ.
               </p>
             </div>
 
@@ -213,126 +213,6 @@
               <span class="text-[10px] text-slate-400 block mb-0.5">Lần đóng ca gần nhất</span>
               <span class="text-xs font-bold text-slate-700 truncate block">{{ lastShiftCloseFormatted }}</span>
             </div>
-          </div>
-
-          <!-- 3. Khu vực Bản Sao Lưu Đám Mây (Cloud Supabase) -->
-          <div class="space-y-2.5 pt-2">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <Cloud class="w-4 h-4 text-indigo-600" />
-                <h4 class="font-bold text-slate-900 text-xs">Bản Sao Lưu Cloud Supabase</h4>
-                <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
-                  {{ cloudBackups.length }}/3 bản gần nhất
-                </span>
-              </div>
-
-              <!-- Nút Sao Lưu Ngay & Khôi Phục File .db Thủ Công -->
-              <div class="flex items-center gap-2">
-                <button
-                  type="button"
-                  @click="triggerManualCloudBackup"
-                  :disabled="uploadingCloudBackup"
-                  class="py-1.5 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 border border-indigo-200/70 font-bold text-[11px] transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50 active:scale-95"
-                  title="Sao lưu ngay lập tức lên Cloud mà không cần đóng ca"
-                >
-                  <CloudUpload class="w-3.5 h-3.5 text-indigo-600" />
-                  <span>{{ uploadingCloudBackup ? 'Đang gửi...' : 'Sao Lưu Ngay' }}</span>
-                </button>
-
-                <button
-                  type="button"
-                  @click="triggerFileInput"
-                  :disabled="restoringBackup"
-                  class="py-1.5 px-3 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold text-[11px] transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50 active:scale-95 shadow-2xs"
-                  title="Khôi phục từ file .db thủ công có sẵn trên máy"
-                >
-                  <Upload class="w-3.5 h-3.5 text-slate-500" />
-                  <span class="hidden sm:inline">Khôi Phục File .db</span>
-                  <span class="sm:hidden">Nạp File</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Hidden File Input for Manual .db Restore -->
-            <input
-              ref="fileInputRef"
-              type="file"
-              accept=".db"
-              @change="onFileSelected"
-              class="hidden"
-            />
-
-            <!-- Danh sách các file backup dạng Bảng thẻ tinh tế -->
-            <div v-if="loadingCloudBackups" class="py-8 text-center text-slate-400 text-xs flex flex-col items-center gap-2 bg-slate-50/50 rounded-xl border border-slate-200/60">
-              <RefreshCw class="w-5 h-5 animate-spin text-indigo-500" />
-              <span>Đang kiểm tra danh sách bản sao lưu từ Cloud...</span>
-            </div>
-
-            <div v-else-if="cloudBackups.length === 0" class="p-6 rounded-xl bg-slate-50/70 border border-dashed border-slate-200 text-center text-xs">
-              <Cloud class="w-6 h-6 mx-auto mb-1 text-slate-400 stroke-1" />
-              <p class="font-medium text-slate-600">Chưa có bản sao lưu nào trên Đám mây</p>
-              <p class="text-[11px] text-slate-400 mt-0.5">Mỗi lần bạn đóng ca, hệ thống sẽ tự động đồng bộ file nén lên đây.</p>
-            </div>
-
-            <div v-else class="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs">
-              <div
-                v-for="(b, idx) in cloudBackups"
-                :key="b.fileName"
-                class="flex flex-col sm:flex-row sm:items-center justify-between p-3 hover:bg-slate-50/80 transition gap-2"
-              >
-                <div class="flex items-center gap-3">
-                  <div 
-                    class="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[10px] shrink-0"
-                    :class="idx === 0 ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-100 text-slate-500'"
-                  >
-                    {{ idx === 0 ? 'MỚI' : `#${idx + 1}` }}
-                  </div>
-                  <div>
-                    <div class="flex items-center gap-2">
-                      <p class="font-semibold text-slate-800 font-mono text-xs">{{ b.fileName }}</p>
-                      <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-slate-100 text-slate-600 font-mono">
-                        {{ b.fileSizeFormatted }}
-                      </span>
-                    </div>
-                    <p class="text-[11px] text-slate-400 mt-0.5">
-                      Thời gian sao lưu: {{ formatBackupDate(b.createdAt) }}
-                    </p>
-                  </div>
-                </div>
-
-                <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
-                  <a
-                    :href="b.downloadUrl"
-                    target="_blank"
-                    class="px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-[11px] font-semibold transition flex items-center gap-1 border border-slate-200 cursor-pointer"
-                    title="Tải file zip về máy tính"
-                  >
-                    <Download class="w-3.5 h-3.5" />
-                    <span>Tải về</span>
-                  </a>
-
-                  <button
-                    type="button"
-                    @click="confirmRestoreCloudBackup(b)"
-                    :disabled="restoringCloudBackup"
-                    class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50 active:scale-95 shadow-2xs"
-                    title="Nạp lại toàn bộ dữ liệu từ bản sao lưu này"
-                  >
-                    <RefreshCw class="w-3.5 h-3.5" :class="{ 'animate-spin': restoringCloudBackup }" />
-                    <span>Khôi phục</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 4. Ghi chú bảo mật tối giản & thanh lịch -->
-          <div class="flex items-center justify-between text-[11px] text-slate-500 px-1 pt-1 border-t border-slate-100">
-            <div class="flex items-center gap-1.5">
-              <ShieldCheck class="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <span>Dữ liệu được nén tự động mỗi khi đóng ca. Lưu trữ tối đa 3 bản mới nhất trên Supabase Cloud.</span>
-            </div>
-            <span class="text-[10px] text-slate-400 hidden sm:inline">An toàn • Không chiếm bộ nhớ máy</span>
           </div>
         </div>
 
@@ -445,58 +325,7 @@
 
     </div>
 
-    <!-- Modal Xác Nhận Khôi Phục Dữ Liệu -->
-    <div
-      v-if="showRestoreModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-fade-in"
-    >
-      <div class="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl">
-        <div class="flex items-center gap-3 text-amber-500">
-          <div class="p-3 bg-amber-50 rounded-xl border border-amber-200">
-            <AlertTriangle class="w-6 h-6" />
-          </div>
-          <div>
-            <h3 class="text-base font-bold text-slate-900">Xác Nhận Khôi Phục Dữ Liệu</h3>
-            <p class="text-xs text-slate-500">Hành động này sẽ thay thế cơ sở dữ liệu hiện tại</p>
-          </div>
-        </div>
 
-        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-2">
-          <div class="flex justify-between">
-            <span class="text-slate-500">File được chọn:</span>
-            <span class="text-slate-900 font-mono font-bold">{{ selectedFile?.name }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-slate-500">Dung lượng:</span>
-            <span class="text-emerald-600 font-mono">{{ Math.round((selectedFile?.size || 0) / 1024) }} KB</span>
-          </div>
-        </div>
-
-        <p class="text-xs text-slate-600 leading-relaxed">
-          Cơ sở dữ liệu của hệ thống sẽ được phục hồi theo file đã chọn. Bạn có chắc chắn muốn tiếp tục không?
-        </p>
-
-        <div class="flex items-center justify-end gap-3 pt-2">
-          <button
-            type="button"
-            @click="cancelRestore"
-            :disabled="restoringBackup"
-            class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition"
-          >
-            Hủy Bỏ
-          </button>
-          <button
-            type="button"
-            @click="confirmRestore"
-            :disabled="restoringBackup"
-            class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-500/25 transition flex items-center gap-2"
-          >
-            <RefreshCw v-if="restoringBackup" class="w-3.5 h-3.5 animate-spin" />
-            <span>{{ restoringBackup ? 'Đang Khôi Phục...' : 'Đồng Ý Khôi Phục' }}</span>
-          </button>
-        </div>
-      </div>
-    </div>
 
     <!-- Modal Đóng Ca Cuối Ngày -->
     <ShiftCloseModal
@@ -576,17 +405,11 @@ import {
   QrCode,
   Store,
   Save,
-  Database,
-  Download,
-  Upload,
   RefreshCw,
-  AlertTriangle,
   CheckCircle2,
   ShieldCheck,
   Moon,
   Key,
-  Cloud,
-  CloudUpload,
   Sparkles
 } from 'lucide-vue-next'
 
@@ -688,22 +511,11 @@ async function handleActivateLicense() {
   }
 }
 
-// Đóng Ca & Backup State
+// Đóng Ca State
 const isShiftModalOpen = ref(false)
 const lastShiftClose = ref(localStorage.getItem('diropos_last_shift_close'))
 const backupInfo = ref(null)
 const loadingBackupInfo = ref(false)
-const downloadingBackup = ref(false)
-const restoringBackup = ref(false)
-const showRestoreModal = ref(false)
-const selectedFile = ref(null)
-const fileInputRef = ref(null)
-
-// Cloud Backup State
-const cloudBackups = ref([])
-const loadingCloudBackups = ref(false)
-const uploadingCloudBackup = ref(false)
-const restoringCloudBackup = ref(false)
 
 const lastShiftCloseFormatted = computed(() => {
   if (!lastShiftClose.value) return 'Chưa đóng ca'
@@ -721,81 +533,8 @@ const lastShiftCloseFormatted = computed(() => {
 
 function onShiftCompleted(event) {
   lastShiftClose.value = event.time
-  notify.success('Đã đóng ca thành công! Dữ liệu đã được đồng bộ lên Cloud an toàn.')
+  notify.success('Đã đóng ca thành công!')
   loadBackupInfo()
-  loadCloudBackups()
-}
-
-function showToast(msg) {
-  notify.success(msg)
-}
-
-function formatBackupDate(isoStr) {
-  if (!isoStr) return '---'
-  try {
-    const d = new Date(isoStr)
-    const hh = String(d.getHours()).padStart(2, '0')
-    const mm = String(d.getMinutes()).padStart(2, '0')
-    const day = String(d.getDate()).padStart(2, '0')
-    const month = String(d.getMonth() + 1).padStart(2, '0')
-    const year = d.getFullYear()
-    return `${hh}:${mm} - ${day}/${month}/${year}`
-  } catch {
-    return isoStr
-  }
-}
-
-async function loadCloudBackups() {
-  loadingCloudBackups.value = true
-  try {
-    const res = await api.getCloudBackups()
-    if (res.data) {
-      cloudBackups.value = res.data
-    }
-  } catch (err) {
-    console.error('Lỗi khi tải danh sách backup cloud:', err)
-  } finally {
-    loadingCloudBackups.value = false
-  }
-}
-
-async function triggerManualCloudBackup() {
-  uploadingCloudBackup.value = true
-  try {
-    const res = await api.uploadCloudBackup()
-    if (res.data?.success) {
-      notify.success(res.data.message || 'Đã sao lưu lên Cloud thành công!')
-      await loadCloudBackups()
-    }
-  } catch (err) {
-    notify.error('Lỗi khi sao lưu lên Cloud: ' + (err.response?.data || err.message))
-  } finally {
-    uploadingCloudBackup.value = false
-  }
-}
-
-async function confirmRestoreCloudBackup(b) {
-  const ok = await askConfirm({
-    title: 'Xác Nhận Khôi Phục Dữ Liệu Cloud?',
-    message: `Bạn đang chọn khôi phục từ bản sao lưu Cloud:\n• File: ${b.fileName}\n• Ngày tạo: ${formatBackupDate(b.createdAt)}\n\nLưu ý: Toàn bộ dữ liệu bán hàng hiện tại sẽ được nạp lại theo bản này (hệ thống sẽ tự động lưu 1 bản dự phòng trước khi khôi phục). Bạn có chắc chắn muốn tiếp tục?`,
-    type: 'warning',
-    confirmText: 'Khôi phục ngay',
-    cancelText: 'Hủy bỏ'
-  })
-  if (!ok) return
-
-  restoringCloudBackup.value = true
-  try {
-    const res = await api.restoreCloudBackup({ fileName: b.fileName })
-    notify.success(res.data?.message || 'Khôi phục dữ liệu từ Cloud thành công!')
-    setTimeout(() => {
-      window.location.reload()
-    }, 1200)
-  } catch (err) {
-    notify.error('Lỗi khôi phục từ Cloud: ' + (err.response?.data || err.message))
-  } finally {
-    restoringCloudBackup.value = false
-  }
 }
 
 async function loadData() {
@@ -832,7 +571,6 @@ async function loadBackupInfo() {
 onMounted(() => {
   loadData()
   loadBackupInfo()
-  loadCloudBackups()
 })
 
 function onBankChange() {
@@ -873,82 +611,5 @@ async function saveSettings() {
   }
 }
 
-// Chức năng tải bản sao lưu (.db)
-async function downloadDbBackup() {
-  downloadingBackup.value = true
-  try {
-    const response = await api.downloadBackup()
-    const blob = new Blob([response.data], { type: 'application/octet-stream' })
-    const downloadUrl = window.URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    
-    // Đặt tên file theo định dạng DiroPos
-    const dateStr = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14)
-    link.href = downloadUrl
-    link.setAttribute('download', `diropos_backup_${dateStr}.db`)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    window.URL.revokeObjectURL(downloadUrl)
 
-    notify.success('Đã tải bản sao lưu cơ sở dữ liệu thành công!')
-    loadBackupInfo()
-  } catch (err) {
-    console.error('Lỗi sao lưu:', err)
-    notify.error('Không thể tải file sao lưu: ' + (err.response?.data || err.message))
-  } finally {
-    downloadingBackup.value = false
-  }
-}
-
-// Chức năng khôi phục (.db)
-function triggerFileInput() {
-  if (fileInputRef.value) {
-    fileInputRef.value.value = ''
-    fileInputRef.value.click()
-  }
-}
-
-function onFileSelected(event) {
-  const file = event.target.files?.[0]
-  if (!file) return
-
-  if (!file.name.endsWith('.db')) {
-    notify.warning('Vui lòng chọn file có phần mở rộng .db')
-    return
-  }
-
-  selectedFile.value = file
-  showRestoreModal.value = true
-}
-
-function cancelRestore() {
-  showRestoreModal.value = false
-  selectedFile.value = null
-}
-
-async function confirmRestore() {
-  if (!selectedFile.value) return
-  restoringBackup.value = true
-
-  try {
-    const formData = new FormData()
-    formData.append('file', selectedFile.value)
-
-    const res = await api.restoreBackup(formData)
-    showRestoreModal.value = false
-    selectedFile.value = null
-    notify.success(res.data?.message || 'Đã khôi phục dữ liệu thành công!')
-    
-    await Promise.all([
-      loadData(),
-      loadBackupInfo()
-    ])
-  } catch (err) {
-    console.error('Lỗi khi khôi phục:', err)
-    notify.error('Lỗi khôi phục dữ liệu: ' + (err.response?.data || err.message))
-  } finally {
-    restoringBackup.value = false
-  }
-}
 </script>
