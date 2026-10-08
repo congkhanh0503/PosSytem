@@ -2,6 +2,8 @@
 
 > **DiroPos** là giải pháp Point-of-Sale (POS) và quản trị doanh thu - kho hàng chuyên nghiệp, hiện đại, mượt mà dành cho các cửa hàng bán lẻ, tiệm cắt tóc, salon, quán cafe, spa và chuỗi dịch vụ. Hệ thống được tối ưu hóa cho màn hình cảm ứng, tích hợp thanh toán VietQR động, kiểm soát tồn kho nghiêm ngặt và đồng bộ quản trị bản quyền từ xa qua Cloud.
 
+> 📖 **Dành cho các AI Agents & Lập trình viên:** Đọc tài liệu kiến trúc toàn diện về hệ sinh thái **DiroPos** và **DiroAdmin** tại 👉 **[AI_SYSTEM_CONTEXT.md](file:///d:/Project/CongBaber/AI_SYSTEM_CONTEXT.md)**.
+
 ---
 
 ## 🌟 Tính Năng Nổi Bật
