@@ -87,13 +87,22 @@ Hệ sinh thái gồm **2 mảnh ghép cốt lõi**:
 - CRUD Dịch vụ: Tên dịch vụ, Đơn giá, Thời lượng làm (phút), Thuộc danh mục nào, Bật/tắt hiển thị.
 - Quản lý danh mục dịch vụ (`ServiceCategoriesController.cs`).
 
-#### 4. Quản Lý Sản Phẩm & Tồn Kho (`ProductsView.vue`, `ProductsController.cs`)
+#### 4. Quản Lý Sản Phẩm & Kiểm Soát Tồn Kho 3 Lớp (`ProductsView.vue`, `ProductsController.cs`)
 - CRUD Sản phẩm: Tên sản phẩm, Đơn giá bán, Giá vốn (nhập), Số lượng tồn kho, Ngưỡng cảnh báo hết hàng.
+- **Cơ chế chặn bán âm kho nghiêm ngặt ở 3 lớp (3-Layer Stock Protection):**
+  - **Lớp 1 (Menu UI):** Khi tồn kho `= 0`, tự động hiển thị nhãn *"Hết hàng"*, làm mờ thẻ sản phẩm và vô hiệu hóa nút thêm vào giỏ.
+  - **Lớp 2 (Giỏ hàng & Modal):** Hiển thị rõ số lượng còn lại (`Kho: x`), khóa nút tăng số lượng khi chạm trần tồn kho, chặn nút thanh toán nếu có món vượt tồn kho.
+  - **Lớp 3 (Backend API):** Kiểm tra `Product.Stock >= Quantity` trong transaction trước khi trừ kho và tạo đơn, ngăn ngừa hoàn toàn tình trạng âm kho do bấm nhanh hoặc thao tác đồng thời.
 - Nút tăng/giảm kho nhanh (+1 / -1) giúp kiểm kho tại quầy cực kỳ nhanh gọn.
-- Cảnh báo tồn kho thông minh khi số lượng chạm ngưỡng an toàn.
-- Quản lý danh mục sản phẩm (`ProductCategoriesController.cs`).
+- Phân định rõ ràng: Sản phẩm (có trừ kho) và Dịch vụ (không giới hạn kho).
 
-#### 5. Quản Lý Chi Tiêu Tiệm - OPEX (`ExpensesView.vue`, `ExpensesController.cs`)
+#### 5. Quản Lý Ca Làm Việc Chặt Chẽ (Shift Management)
+- **Mở ca (Open Shift):** Khai báo số tiền mặt ban đầu tại ngăn kéo thu ngân khi nhân viên bắt đầu ca làm việc.
+- **Vận hành trong ca:** Theo dõi toàn bộ dòng tiền phát sinh theo ca (tiền mặt thu vào, chuyển khoản VietQR, tiền chi ra cho sinh hoạt/phụ liệu).
+- **Tổng kết & Đóng ca (Close Shift):** Khai báo số tiền mặt thực tế khi kết thúc ca, đối soát doanh thu lý thuyết vs thực tế, tính toán chênh lệch (thừa/thiếu tiền).
+- **Chống gian lận thu ngân:** Tự động khóa tính năng chỉnh sửa/hủy đơn hàng của các ca đã đóng.
+
+#### 6. Quản Lý Chi Tiêu Tiệm - OPEX (`ExpensesView.vue`, `ExpensesController.cs`)
 - Ghi nhận mọi chi phí vận hành cửa hàng:
   - *Mặt bằng & Tiện ích* (Tiền thuê mặt bằng, điện, nước, internet, rác...).
   - *Phụ liệu & Hóa chất* (Lưỡi dao lam, bọt cạo râu, thuốc uốn/nhuộm, khăn giấy...).
@@ -103,7 +112,7 @@ Hệ sinh thái gồm **2 mảnh ghép cốt lõi**:
 - Bộ lọc lịch chi tiêu: Hôm nay, Hôm qua, 7 ngày, Tháng này, Tùy chọn ngày.
 - Thống kê tổng chi hôm nay, tổng chi tháng này.
 
-#### 6. Báo Cáo Doanh Thu, Chi Phí & Lợi Nhuận Ròng (`DashboardView.vue`, `DashboardController.cs`)
+#### 7. Báo Cáo Doanh Thu, Chi Phí & Lợi Nhuận Ròng (`DashboardView.vue`, `DashboardController.cs`)
 - **Tự động tính Lợi Nhuận Ròng (Net Profit):**
   $$\text{Lợi Nhuận Ròng} = \text{Doanh Thu Thuần} - \text{Chi Phí Vận Hành}$$
 - **Bộ chuyển đổi tháng nhanh:** Xem tháng này, tháng trước hoặc chọn bất kỳ tháng nào trong quá khứ (`type="month"`).
